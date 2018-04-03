@@ -1,0 +1,5 @@
+header("location: ./?connect=main&error_msg=Unable to connect!");
+
+if($_REQUEST['error_msg']){
+	echo "<script>alert('".$_REQUEST['error_msg']."');</script>";
+}

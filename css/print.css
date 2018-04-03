@@ -1,0 +1,19 @@
+body {visibility:hidden;}
+.print {visibility:visible;}
+#BrowserPrintDefaults{display:none} 
+.lblck{display:none;}
+.menu{display:none;}
+
+/*table, figure {
+  page-break-inside: avoid;
+}*/
+
+@page:left{
+  @bottom-left {
+    content: "Page " counter(page) " of " counter(pages);
+  }
+}
+@page {
+  size: A4;
+  font-size: 9pt;
+}

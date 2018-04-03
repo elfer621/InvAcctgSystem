@@ -1,0 +1,9 @@
+update tbl_journal_entry a set account_group=(select account_group from tbl_chart_of_account where account_code=a.account_code);
+
+update tbl_journal_entry a set account_type=(select account_type from tbl_chart_of_account where account_code=a.account_code);
+
+update tbl_journal_entry a set report_type=(select report_type from tbl_chart_of_account where account_code=a.account_code);
+
+update tbl_journal_entry a set subsidiary=(select subsidiary from tbl_chart_of_account where account_code=a.account_code);
+
+update tbl_journal_entry a set cash_in_bank=(select cash_in_bank from tbl_chart_of_account where account_code=a.account_code);

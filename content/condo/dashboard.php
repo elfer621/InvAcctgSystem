@@ -1,0 +1,1 @@
+<img src='./content/condo/img/dashboard.png' style="width:700px;"/>

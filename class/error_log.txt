@@ -1,0 +1,20 @@
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: error_msg in F:\xampp\htdocs\lizgan\index.php on line 19
+[24-Feb-2017 12:15:04 UTC] PHP Warning:  mysql_set_charset() expects parameter 1 to be string, resource given in F:\xampp\htdocs\lizgan\class\dbConnection.php on line 62
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: startserverreading in F:\xampp\htdocs\lizgan\index.php on line 169
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: changepass in F:\xampp\htdocs\lizgan\index.php on line 178
+[24-Feb-2017 12:15:04 UTC] PHP Warning:  mysql_fetch_assoc() expects parameter 1 to be resource, boolean given in F:\xampp\htdocs\lizgan\class\dbConnection.php on line 99
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined variable: result in F:\xampp\htdocs\lizgan\class\dbConnection.php on line 102
+[24-Feb-2017 12:15:04 UTC] PHP Warning:  Invalid argument supplied for foreach() in F:\xampp\htdocs\lizgan\dashboard_branch.php on line 55
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: location in F:\xampp\htdocs\lizgan\content\stockin.php on line 2
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: stockin_date in F:\xampp\htdocs\lizgan\content\stockin.php on line 9
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: poDISCOUNT1 in F:\xampp\htdocs\lizgan\content\stockin.php on line 178
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: poDISCOUNT2 in F:\xampp\htdocs\lizgan\content\stockin.php on line 181
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: frompo in F:\xampp\htdocs\lizgan\content\stockin.php on line 243
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Use of undefined constant arsort - assumed 'arsort' in F:\xampp\htdocs\lizgan\content\stockin.php on line 248
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: frompo in F:\xampp\htdocs\lizgan\content\stockin.php on line 260
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: poqty in F:\xampp\htdocs\lizgan\content\stockin.php on line 260
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: poDISCOUNT1 in F:\xampp\htdocs\lizgan\content\stockin.php on line 281
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: poDISCOUNT2 in F:\xampp\htdocs\lizgan\content\stockin.php on line 281
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: location in F:\xampp\htdocs\lizgan\content\stockin.php on line 414
+[24-Feb-2017 12:15:04 UTC] PHP Notice:  Undefined index: location in F:\xampp\htdocs\lizgan\content\stockin.php on line 416
+[24-Feb-2017 12:15:04 UTC] PHP Warning:  mysql_close(): 7 is not a valid MySQL-Link resource in F:\xampp\htdocs\lizgan\class\dbConnection.php on line 25

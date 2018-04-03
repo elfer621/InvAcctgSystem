@@ -1,0 +1,13 @@
+Confirm Dialog Preference
+----------Solution--------------
+
+    Start Firefox, and type about:config in the url bar. Firefox will show the preferences screen. Please take care not to make changes at random.
+    Right click in the preferences area, and choose New > Integer from the popup menu.
+    In the dialog box that now appears, enter dom.successive_dialog_time_limit, followed by the value 0 (zero). Press OK.
+
+----------Solution--------------
+
+   Anonymous wrote:Found a fix to Firefox must send info...
+
+   Tools,Options, Advance,Network
+   uncheck "Tell me when a Website asks to store"

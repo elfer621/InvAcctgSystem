@@ -1,0 +1,28 @@
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: view in E:\webserver\htdocs\ccrcV1.35\settings.php on line 41
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: 192.168.10.47 in E:\webserver\htdocs\ccrcV1.35\settings.php on line 110
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: howmanycounter in E:\webserver\htdocs\ccrcV1.35\settings.php on line 122
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: connect in E:\webserver\htdocs\ccrcV1.35\settings.php on line 134
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: connect in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 23
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: conlist in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 24
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Warning:  mysql_set_charset() expects parameter 1 to be string, resource given in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 36
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: connect in E:\webserver\htdocs\ccrcV1.35\class\dbUpdate.php on line 57
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: conlist in E:\webserver\htdocs\ccrcV1.35\class\dbUpdate.php on line 58
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined index: search in E:\webserver\htdocs\ccrcV1.35\content\ccrc\contract.php on line 22
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Warning:  Missing argument 2 for dbConnect::resultArray(), called in E:\webserver\htdocs\ccrcV1.35\content\ccrc\contract.php on line 27 and defined in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 164
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Warning:  Missing argument 3 for dbConnect::resultArray(), called in E:\webserver\htdocs\ccrcV1.35\content\ccrc\contract.php on line 27 and defined in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 164
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined variable: tbl in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 165
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined variable: condition in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 165
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, boolean given in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 166
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Notice:  Undefined variable: result in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 169
+[26-Sep-2017 10:10:10 Asia/Manila] PHP Warning:  Invalid argument supplied for foreach() in E:\webserver\htdocs\ccrcV1.35\content\ccrc\contract.php on line 48
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: view in E:\webserver\htdocs\ccrcV1.35\settings.php on line 41
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: 192.168.10.47 in E:\webserver\htdocs\ccrcV1.35\settings.php on line 110
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: howmanycounter in E:\webserver\htdocs\ccrcV1.35\settings.php on line 122
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: connect in E:\webserver\htdocs\ccrcV1.35\settings.php on line 134
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: connect in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 23
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: conlist in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 24
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Warning:  mysql_set_charset() expects parameter 1 to be string, resource given in E:\webserver\htdocs\ccrcV1.35\class\dbConnection.php on line 36
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: connect in E:\webserver\htdocs\ccrcV1.35\class\dbUpdate.php on line 57
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: conlist in E:\webserver\htdocs\ccrcV1.35\class\dbUpdate.php on line 58
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined index: search in E:\webserver\htdocs\ccrcV1.35\content\ccrc\contract.php on line 22
+[26-Sep-2017 10:12:07 Asia/Manila] PHP Notice:  Undefined variable: sql in E:\webserver\htdocs\ccrcV1.35\content\ccrc\contract.php on line 27

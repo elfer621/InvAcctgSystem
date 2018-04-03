@@ -1,0 +1,64 @@
+html, body {margin: 0; padding: 0;}
+/*body {padding: 1em;}*/
+
+/* main layout colors and typography */
+/*html {background: #02538A url(background_gradient.png) repeat-x center top;}*/
+body {font-size: small; font-family: arial, sans-serif; color: #3B3B3B; background-color: #F7F7F7;}
+a {color: #4F7BAF;}
+a:hover {color: #1C496F;}
+
+/* Some more CSS to make the information page look nice */
+h1 {margin: 0; padding: 0;}
+p.subtitle {margin: 0 0 1em 0; padding: 0;}
+p.subtitle a {color: #3B3B3B; text-decoration: none;}
+p.subtitle a:hover {color: #1C496F; text-decoration: underline;}
+
+ul#nav {margin: 1em 0; padding: 0; list-style: none;}
+ul#nav li {display: inline; margin-right: 1em;}
+ul#nav li a {padding-left: 10px; background: url(list_icon.png) no-repeat left center;}
+
+p.legend {line-height: 1.5;}
+kbd {border: 2px outset gray; font-weight: bold; padding: 0 0.15em;}
+tt {font-weight: bold;}
+code strong {background-color: #DFDFDF; font-weight: normal;}
+dt {margin: 0.5em 0;}
+
+/* Make the comments a bit nicer */
+ul.comment_list {margin: 1em 0; padding: 0; list-style: none; width: 45em;}
+.comment, form.comment {overflow: auto; margin: 1em 0; padding: 0; border: 0.5em solid #EAEAEA; border-width: 0.5em 0;}
+.comment h3, form.comment fieldset {float: left; margin: 0; padding: 0.5em; width: 10em; background-color: #EAEAEA; font-size: 1em;}
+.comment div.body, form.comment p.body {padding: 0.5em; border-left: 11em solid #EAEAEA;}
+
+.comment.by_author, ul.comment_list li.comment.by_author div.body {border-color: #D2DBE0;}
+.comment.by_author h3 {background-color: #D2DBE0;}
+
+/* Styles for the new comment form */
+form.comment, div.comment {width: 45em;}
+
+form.comment fieldset {border: none; margin-top: -0.5em;}
+form.comment fieldset p {margin: 0.5em 0; padding: 0; font-size: 1em;}
+form.comment fieldset p label {display: block; font-size: 0.9em;}
+form.comment fieldset p input {display: block; width: 100%; margin: 0.125em 0; padding: 1px; border: 1px solid gray;}
+form.comment fieldset p input#comment_spam_test {width: 2em;}
+
+form.comment p.body {margin: 0;}
+form.comment p.body label {display: block; margin-bottom: 0.125em; font-size: 0.9em;}
+form.comment p.body textarea {width: 30em; height: 13em; margin: 0; padding: 1px; border: 1px solid gray; font-family: arial, sans-serif; font-size: 1em;}
+
+form.comment p.buttons {clear: both; margin: 0; padding: 0.5em 0 0 0; background-color: #EAEAEA; text-align: center;}
+form.comment p.buttons input {margin: 0 1em; padding: 0.1em 1em; border: 1px outset gray; background-color: white;}
+
+form.comment fieldset p input:focus, form.comment p.body textarea:focus {border-color: #02538A;}
+
+/* Styles for the record errors box */
+div.errors {width: 45em; margin: 1em 0; padding: 0.5em; border: 1px solid #FB7B7B; background-color: #F8DEDE;}
+div.errors h3 {margin: 0 0 0.5em 0; padding: 0; font-size: 1.1em;}
+div.errors p {margin: 1em 0; padding: 0;}
+div.errors ul {margin: 1em 0 0 0; padding: 0 0 0 1.5em;}
+
+form.comment fieldset input.invalid, form.comment p textarea.invalid {border-color: #FB7B7B;}
+
+/* Styles for the project overview */
+ul.projects {margin: 1em 0; padding: 0; list-style: none;}
+
+#loading {background: url(images/ajax-loader.gif) no-repeat center center;z-index:99999999 !important;width:100px;height:100px;margin: 100px auto 0 auto;display:none;}
