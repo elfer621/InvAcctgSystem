@@ -2100,6 +2100,7 @@ switch($_REQUEST['execute']){
 				<div style="float:left;width:20%;"><input checked="checked" type="radio" name="paidtype" value="Cash" /> Cash </div>
 				<div style="float:left;width:20%;"><input type="radio" name="paidtype" value="Cheque" /> Cheque </div>
 			</fieldset>
+			<div style="clear:both;height:5px;"></div>
 			<input type="button" value="Save" style="float:left;height:40px;width:180px;" onclick="savecustpay()"/>
 		</div>
 		<div style="float:right;width:45%;">
@@ -3835,6 +3836,7 @@ switch($_REQUEST['execute']){
 			<div style="float:left;"><input type="radio" value="" name="status_hidden"/> All </div>
 		</fieldset-->
 		<script>
+			var stat = false;
 			function search_prod(val){
 				if(val.length >= 1){
 					$.ajax({
@@ -3844,6 +3846,7 @@ switch($_REQUEST['execute']){
 					  success: function(data) {
 						$("#tbl_content").html(data);
 						jQuery.tableNavigation();
+						stat=true;
 					  }
 					});
 				}else{
@@ -3937,7 +3940,7 @@ switch($_REQUEST['execute']){
 				foreach($res as $key => $row){ 
 				?>
 					<tr style="color:<?=($row['bal_total']>0?"blue;":"black;")?>">
-						<td><a href="javascript:itemSelected('<?php echo $row['barcode'] ?>','<?=$_REQUEST['bcodeid']?>')" class="activation"><?php echo $row['barcode'] ?></a></td>
+						<td><a href="javascript:itemSelected('<?php echo $row['barcode'] ?>','<?=$_REQUEST['bcodeid']?>');" class="activation"><?php echo $row['barcode'] ?></a></td>
 						<td style="display:none;"><?= $row['skuid']?></td>
 						<td><?= $row['product_name']?></td>
 						<?php if($_SESSION['settings']['system_name']=="TKC"){ ?>
@@ -3959,9 +3962,12 @@ switch($_REQUEST['execute']){
 		</table>
 		<script>
 			function itemSelected(barcode,id){
-				setValue(barcode,id);
+				if(stat){
+					setValue(barcode,id);
+					$('#prodlist').dialog('close');
+					stat=false;
+				}
 				//barcode_area(barcode,id); //process barcodes
-				$('#prodlist').dialog('close');
 			}
 		</script>
 		<?

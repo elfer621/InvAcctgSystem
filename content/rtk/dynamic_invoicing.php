@@ -460,7 +460,7 @@ function addItemDetails(barcode){
 					<td><input type="text" name="items['+num+'][items_spec]" value="'+v['product_name']+'" style="width:100%;"/></td>\
 					<td><input type="text" class="qty" name="items['+num+'][qty]" value="1" style="width:100%;"/></td>\
 					<td><input type="text" name="items['+num+'][unit]" value="'+v['base_unit']+'" style="width:100%;"/></td>\
-					<td><input type="text" class="unitprice" name="items['+num+'][unit_price]" value="'+strtocurrency(v['price'])+'" style="width:100%;"/></td>\
+					<td><input type="text" class="unitprice" name="items['+num+'][unit_price]" value="'+strtocurrency(v['price'])+'" style="width:100%;text-align:right;"/></td>\
 					<td><input type="text" class="amt" name="items['+num+'][amount]" style="width:100%;text-align:right;" value="'+strtocurrency(v['price'])+'"/></td>\
 				</tr>';
 				$("#items_tbl tbody").prepend(txt);
