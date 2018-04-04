@@ -1,4 +1,4 @@
-sdfsdfsdfxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 139
+sffffffffffffffffffffffffffffffffffffffffffsdfsdfsdfxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 139
 [27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 140
 [27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 141
 [27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: restrictionid in D:\xampp\htdocs\lizganV1.39\dashboard_lab.php on line 1
