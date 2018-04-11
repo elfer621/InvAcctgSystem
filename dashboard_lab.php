@@ -95,6 +95,8 @@
 	<br/>
 	<input id="bt4" class="buthov" type="button" onclick="window.location='?page=import_files';" value="Import Data" style="height:40px;width:100%;float:left;"/>
 	<br/>
+	<input id="bt7" class="buthov" type="button" onclick="window.location='?page=doctorappointment&iframe=true';" value="Room Reservation" style="height:40px;width:100%;float:left;"/>
+	<br/>
 <? }else{ ?>
 	<button id="bt13" class="buthov" type="button" onclick="show_patientinfo();"  style="float:right;height:30px;width:100%;float:left;font-size:11px;"><span style="font-weight:bold;text-decoration:underline;">P</span>atient</button>
 	<br/>

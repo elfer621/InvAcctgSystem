@@ -117,6 +117,9 @@ switch($_REQUEST['page']){
 	case'roomreservation':
 		$dashboard='./roomreservation/index.php';
 	break;
+	case'doctorappointment':
+		$dashboard='./DoctorAppointment/index.php';
+	break;
 	case'payroll':
 		$dashboard ="./content/rber/payroll.php";
 	break;
