@@ -1,24 +1,4 @@
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: restrictionid in D:\xampp\htdocs\lizganV1.39\settings.php on line 30
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: ::1 in D:\xampp\htdocs\lizganV1.39\settings.php on line 111
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: connect in D:\xampp\htdocs\lizganV1.39\settings.php on line 135
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: connect in D:\xampp\htdocs\lizganV1.39\class\dbUpdate.php on line 57
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index:  in D:\xampp\htdocs\lizganV1.39\class\dbUpdate.php on line 58
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: error_msg in D:\xampp\htdocs\lizganV1.39\index.php on line 20
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: connect in D:\xampp\htdocs\lizganV1.39\class\dbConnection.php on line 23
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index:  in D:\xampp\htdocs\lizganV1.39\class\dbConnection.php on line 24
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Deprecated:  mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in D:\xampp\htdocs\lizganV1.39\class\dbConnection.php on line 32
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Warning:  mysql_set_charset() expects parameter 1 to be string, resource given in D:\xampp\htdocs\lizganV1.39\class\dbConnection.php on line 36
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: startserverreading in D:\xampp\htdocs\lizganV1.39\index.php on line 172
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: changepass in D:\xampp\htdocs\lizganV1.39\index.php on line 181
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\index.php on line 277
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: error in D:\xampp\htdocs\lizganV1.39\main.php on line 56
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\main.php on line 57
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: connect in D:\xampp\htdocs\lizganV1.39\main.php on line 60
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\main.php on line 71
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\main.php on line 72
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 5
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 139
-[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 140
+sffffffffffffffffffffffffffffffffffffffffffsdfsdfsdfxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 139[27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 140
 [27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: page in D:\xampp\htdocs\lizganV1.39\dashboard.php on line 141
 [27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: restrictionid in D:\xampp\htdocs\lizganV1.39\dashboard_lab.php on line 1
 [27-Nov-2017 10:43:59 Asia/Manila] PHP Notice:  Undefined index: restrictionid in D:\xampp\htdocs\lizganV1.39\dashboard_lab.php on line 1
