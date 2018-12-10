@@ -1,5 +1,7 @@
 <?php
 //unset($_SESSION);
+//$_SESSION['default_db']= 'tkc_db_dummy';
+//$_SESSION['default_db']= 'tkc_db';
 $_SESSION['default_db']= 'rtk_db';
 $_SESSION['default_ip']= $_SERVER['SERVER_NAME'];
 $dbuser="admin";

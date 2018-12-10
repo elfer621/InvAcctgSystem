@@ -48,6 +48,9 @@ if($_POST){
 					'bank'=>$val['checkinfo'][$val['code']]['check_bank'],
 					'bank_validation'=>$val['checkinfo'][$val['code']]['bank_validation'],
 					'ar_refid'=>$val['ar_refid'],
+					'ar_nontrade_refid'=>$val['ar_nontrade_refid'],
+					'ar_nontrade_refinfo'=>$val['ar_nontrade_refinfo'],
+					'ar_nontrade_remarks'=>$val['ar_nontrade_remarks'],
 					'ap_refid'=>$val['ap_refid']
 				);
 				$rec = array_merge($data,$account_info);
@@ -133,7 +136,7 @@ if($_SESSION["vouchering"]['refid']){
 						</div>
 						<div style="clear:both;height:5px;"></div>
 						<div style="float:left;margin-right:5px;">
-							<div style="float:left;margin-right:5px;width:60px;">Reference:</div>
+							<div style="float:left;margin-right:5px;width:60px;">Voucher #:</div>
 							<textarea name="reference" id="reference" style="float:left;width:235px;height:50px;"><?=($info['reference']?$info['reference']:"")?></textarea>
 						</div>
 					</div>
@@ -144,7 +147,7 @@ if($_SESSION["vouchering"]['refid']){
 						</div>
 						<div style="clear:both;height:5px;"></div>
 						<div style="float:left;margin-left:20px;">
-							<div style="float:left;margin-right:5px;width:50px;">REF #:</div>
+							<div style="float:left;margin-right:5px;width:50px;">Entry #:</div>
 							<input style="float:left;width:133px;" readonly type="text" name="refid" id="refid" value="<?=$info['id']?>" />
 						</div>
 						<div style="clear:both;height:5px;"></div>
@@ -299,6 +302,23 @@ if($_SESSION["vouchering"]['refid']){
 													'<option value="">Select Cost Center</option>'.$option.'</select>
 													<div style="clear:both;height:5px;"></div>';
 											break;
+											case'ACCOUNTS RECEIVABLE - NONTRADE':
+												$option="";
+												$customer=$db->resultArray("*,concat(firstname,' ',lastname) name","tbl_employees","");
+												foreach($customer as $k=>$v){
+													$option.= "<option ".($val['ar_nontrade_refid']==$v['id']?"selected":"")." value='".$v['id']."'>".$v['name']."</option>";
+												}
+												$modal = '<div style="float:left;margin-right:10px;width:100px;">Select Employee</div>'.
+													'<select name="entry['.$count.'][ar_nontrade_refid]" style="float:left;width:250px;">'.
+													'<option value="">Select Select Employee</option>'.$option.'</select>
+													<div style="clear:both;height:5px;"></div>'.
+													'<div style="float:left;margin-right:10px;width:100px;">Reference Number</div>'.
+													'<input type="text" name="entry['.$count.'][ar_nontrade_refinfo]" value="'.$val['ar_nontrade_refinfo'].'" style="float:left;width:250px;"/>'.
+													'<div style="clear:both;height:5px;"></div>'.
+													'<div style="float:left;margin-right:10px;width:100px;">Remarks</div>'.
+													'<input type="text" name="entry['.$count.'][ar_nontrade_remarks]" value="'.$val['ar_nontrade_remarks'].'" style="float:left;width:250px;"/>'.
+													'<div style="clear:both;height:5px;"></div>';
+											break;
 										}
 										if($chart['account_group']=="EXPENSES"){
 											$option="";
@@ -369,6 +389,9 @@ $(document).ready(function() {
 	sumCRAmt();
 });
 $("input[name='dr_amt[]'], input[name='cr_amt[]']").live('change',function(){
+	$(this).val(new Number($(this).val()).formatMoney(2));
+});
+$("input[name='dr_amt[]'], input[name='cr_amt[]']").on('change',function(){
 	$(this).val(new Number($(this).val()).formatMoney(2));
 });
 function delJLentry(id,type){

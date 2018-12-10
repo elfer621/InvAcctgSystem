@@ -111,10 +111,10 @@ if($mode=="main"){
 </div>
 <div style="float:right;width:45%;">
 	<div class="lbl">&nbsp;</div>
-	<div style="float:left;"><?php echo $info['date'] ?></div>
+	<div style="float:left;margin-left:50px;"><?php echo $info['date'] ?></div>
 	<div style="clear:both;height:5px;"></div>
 </div>
-<div style="clear:both;height:5px;"></div>
+<div style="clear:both;height:45px;"></div>
 <div class="lbl">&nbsp;</div>
 <div style="float:left;width:85%;"></div>
 <div style="clear:both;height:20px;"></div>
@@ -159,7 +159,14 @@ if($mode=="main"){
 		</tr>
 	</tfoot>
 </table>
-<div style="clear:both;height:20px;"></div>
+<div style="clear:both;height:150px;"></div>
+<table class="tbl" cellspacing="0" cellpadding="0" width="50%">
+<tr>
+	<td style="text-align:center;"><?=strtoupper($_SESSION['xuser_pos'])?></td>
+	<td style="text-align:center;">&nbsp;</td>
+	<td style="text-align:center;">LEON B. TIO</td>
+</tr>
+</table>
 </div>
 <?php
 $db->closeDb();

@@ -41,11 +41,12 @@
 		<td>
 			<?php if($_SESSION['default_db']=="lizgan_main"){ ?>
 			<input type="button" value="TEACHER COMMISSION" onclick="viewReport('reports/prod_sold_commission.php');" style="height:30px;width:100%;"/>
+			<input type="button" value="CLOTHING MATERIALS" onclick="viewReport('reports/sales_reports_lizgan_clothingmat.php');" style="height:30px;width:100%;"/>
 			<?php } ?>
 			<?php if($_SESSION['settings']['system_name']=="CSACCI"){ ?>
 			<input type="button" value="COMPLIANCE" onclick="showReportsPopup('compliance');" style="height:30px;width:100%;"/>
 			<?php } ?>
-			<input type="button" value="A/R Aging" onclick="viewReport('reports/customer_balance_agingSummary.php');" style="height:30px;width:100%;"/>
+			<input type="button" value="A/R AGING" onclick="viewReport('reports/customer_balance_agingSummary<?=$_SESSION['repExtension']?>.php');" style="height:30px;width:100%;"/>
 		</td>
 	</tr>
 	<tr>

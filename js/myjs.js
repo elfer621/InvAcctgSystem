@@ -180,8 +180,8 @@ Number.prototype.formatMoney = function(c, d, t){
 function clickDialog(idname,xwidth,xheight,contentpath,xtitle,param=null,file=null){
 	$('#'+idname).dialog({
 		autoOpen: false,
-		width: (xwidth>$( document ).width()?($( document ).width() * .9):xwidth),
-		height: (xheight>$( document ).height()?($( document ).height() * .9):xheight),
+		width: (xwidth>$( document ).width()?($( document ).width() * .8):xwidth),
+		height: (xheight>$( document ).height()?($( document ).height() * .7):xheight),
 		modal: true,
 		resizable: false,
 		close:function(event){$('#barcode').focus();},
@@ -869,7 +869,7 @@ function qtyclick(bcode,type,divmul){
 	if(newqty !=""){
 		if($.isNumeric(newqty)){
 			if(bcode!=""){
-				if(newqty<1){
+				if(newqty<=-1){
 					loginPermission('negativeQty',{bcode:bcode,newqty:newqty,type:type,divmul:divmul});
 				}else{
 					qtychange(bcode,newqty,type,divmul);
@@ -1017,3 +1017,18 @@ function viewRecordsPackages(){
 	jQuery.tableNavigation();
 	$("#search_prodname").focus();
 }
+
+function sumName(name){
+	var sum = 0;
+	// iterate through each td based on class and add the values
+	$(name).each(function() {
+		//var value = $(this).find("'td:eq(1)'").children().val();
+		var value = $(this).val().replace(/,/g, "");
+		// add only if the value is number
+		if(!isNaN(value) && value.length != 0) {
+			sum += parseFloat(value);
+		}
+	});
+	return sum;
+}
+

@@ -26,7 +26,7 @@
                     </div>
                     <div class="space options">
                         Scale:
-                        <label for='scale-hours'><input type="radio" value="hours" name="scale" id='scale-hours' checked> Hours</label>
+						<label for='scale-hours'><input type="radio" value="hours" name="scale" id='scale-hours' checked> Hours</label>
                         <label for='scale-shifts'><input type="radio" value="shifts" name="scale" id='scale-shifts'> Shifts</label>
                         <label for="business-only"><input type="checkbox" id="business-only"> Hide non-business hours</label>
                     </div>
@@ -58,6 +58,8 @@
             var scheduler = new DayPilot.Scheduler("scheduler");
             scheduler.visible = false; // will be displayed after loading the resources
             scheduler.scale = "Manual";
+			// scheduler.scale = "CellDuration";
+			// scheduler.cellDuration = 30;
             scheduler.timeline = getTimeline();
             scheduler.timeHeaders = getTimeHeaders();
             scheduler.useEventBoxes = "Never";

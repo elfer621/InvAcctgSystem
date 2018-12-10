@@ -18,9 +18,13 @@
 					<ul>
 						<a href='?page=dynamictbl&tblname=tbl_journal_category'>Journals</a>
 						<a href='?page=chart_of_account'>Chart Of Accounts</a>
+						<a href='?page=dynamictbl&tblname=tbl_chart_of_account_subaccount'>Chart Of Accounts (SubAccounts)</a>
+						<a href='?page=dynamictbl&tblname=tbl_chart_of_account_sub_account_group'>Chart Of Accounts (Account Group)</a>
 						<a href='?page=dynamictbl&tblname=tbl_bank_account'>Bank Account</a>
 						<a href='?page=dynamictbl&tblname=tbl_customers'>Debtors/Customers</a>
 						<a href='?page=dynamictbl&tblname=tbl_supplier'>Suppliers</a>
+						<a href='?page=dynamictbl&tblname=tbl_employees'>Employees</a>
+						
 						<!--a href='#'>Currency</a-->
 					</ul>
 				</div>
@@ -50,7 +54,9 @@
 <br/>
 <input id="bt3" class="buthov" type="button" onclick="window.location='?page=dynamic_invoicing&tbltype=sales_invoice';" value="Sales Invoice" style="height:40px;width:100%;float:left;"/>
 <br/>
-<input id="bt5" class="buthov" type="button" onclick="window.location='?page=po';" value="Purchase Order" style="height:40px;width:100%;float:left;"/>
+<input id="bt13" class="buthov" type="button" onclick="window.location='?page=tenant_list';" value="Customer Details" style="height:40px;width:100%;float:left;"/>
+<br/>
+<input id="bt16" class="buthov" type="button" onclick="window.location='?page=reports';" value="Reports" style="height:40px;width:100%;float:left;"/>
 <br/>
 <?php }elseif($_SESSION['restrictionid']==4){ //supervisor ?>
 <div class="dropdown">
@@ -121,8 +127,11 @@
 					<ul>
 						<a href='?page=dynamictbl&tblname=tbl_journal_category'>Journals</a>
 						<a href='?page=chart_of_account'>Chart Of Accounts</a>
+						<a href='?page=dynamictbl&tblname=tbl_chart_of_account_subaccount'>Chart Of Accounts (SubAccounts)</a>
+						<a href='?page=dynamictbl&tblname=tbl_chart_of_account_sub_account_group'>Chart Of Accounts (Account Group)</a>
 						<a href='?page=dynamictbl&tblname=tbl_bank_account'>Bank Account</a>
 						<a href='?page=dynamictbl&tblname=tbl_customers'>Debtors/Customers</a>
+						<a href='?page=dynamictbl&tblname=tbl_employees'>Employees</a>
 						<a href='?page=dynamictbl&tblname=tbl_supplier'>Suppliers</a>
 						<!--a href='#'>Currency</a-->
 					</ul>

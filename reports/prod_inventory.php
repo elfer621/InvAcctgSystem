@@ -57,7 +57,8 @@ $db->openDb();
 $xdate = $_REQUEST['my_date']?$_REQUEST['my_date']:date('Y-m-d');
 $prod = $_REQUEST['prod_name']?"and prod.product_name like '%{$_REQUEST['prod_name']}%'":"";
 $sup = $_REQUEST['supplier_name']?"and sup.supplier_name like '%{$_REQUEST['prod_name']}%'":"";
-$sql="select tbl_2.*,prod.product_name,bcode.barcode,bcode.price,bcode.cost,bcode.unit,tbl_2.item_desc from (select skuid,sum(in_total) in_total,sum(out_total) out_total,sum(in_total-out_total) bal_total,item_desc from (
+$sql="select tbl_2.*,prod.product_name,bcode.barcode,bcode.price,bcode.cost,bcode.unit,tbl_2.item_desc,lotexp.lotexp_details from 
+	(select skuid,sum(in_total) in_total,sum(out_total) out_total,sum(in_total-out_total) bal_total,item_desc from (
 	select skuid,coalesce(sum(qty*coalesce(divmul,1)),0) in_total,0 out_total,item_desc from tbl_stockin_items group by skuid
 	union
 	select skuid,0 in_total,coalesce(sum(qty*coalesce(divmul,1)),0) out_total,item_desc from tbl_sales_items group by skuid
@@ -67,7 +68,8 @@ $sql="select tbl_2.*,prod.product_name,bcode.barcode,bcode.price,bcode.cost,bcod
 	select skuid,0 in_total,coalesce(sum(qty*coalesce(divmul,1)),0) out_total,item_desc from tbl_stockout_items group by skuid) tbl_1 group by skuid) tbl_2 
 	left join tbl_product_name prod on tbl_2.skuid=prod.sku_id 
 	left join tbl_barcodes bcode on tbl_2.skuid=bcode.sku_id 
-	left join tbl_supplier sup on prod.supplier_id=sup.id
+	left join tbl_supplier sup on prod.supplier_id=sup.id 
+	left join (select skuid,group_concat(lotno,' - ',if(expdate='0000-00-00','',expdate) separator '<br/>') lotexp_details from tbl_product_lotexp group by skuid) lotexp on prod.sku_id=lotexp.skuid 
 	where bal_total>0 $prod $sup order by prod.product_name asc";
 $res = $con->resultArray($con->Nection()->query($sql));
 ?>
@@ -82,15 +84,37 @@ $res = $con->resultArray($con->Nection()->query($sql));
 		<input type="text" name="supplier_name" style="float:left;width:100px;" value="<?=$_REQUEST['supplier_name']?>"/>
 		<input type="submit" value="Search" name="search_date" style="float:left;margin:0 5px;"/>
 	</form>
+	<div style="clear:both;height:10px;"></div>
+	<fieldset>
+		<legend>More Columns</legend>
+		<div style="float:left;width:80px;">
+			<input type="checkbox" name="columns[]" value="lotno"/> Lot #
+		</div>
+		<div style="float:left;width:80px;">
+			<input type="checkbox" name="columns[]" value="expdate"/> Exp date
+		</div>
+		<div style="float:left;width:80px;">
+			<input type="checkbox" name="columns[]" value="supplier"/> Supplier
+		</div>
+		<div style="float:left;width:100px;">
+			<input type="checkbox" name="columns[]" value="manufacturer"/> Manufacturer
+		</div>
+		<div style="float:left;width:80px;">
+			<input type="checkbox" name="columns[]" value="selling"/> Selling
+		</div>
+		<input type="submit" value="Execute" name="col_show" style="float:right;margin:0 5px;"/>
+	</fieldset>
 	<div style="clear:both;height:20px;"></div>
 	<table class="tbl" cellspacing="0" cellpadding="0" width="100%">
 		<thead>
 			<tr>
 				<th>Barcodes</th>
 				<th>Desc</th>
+				<th>Lot # / Exp Date</th>
 				<th>Cost</th>
 				<th>Stock OnHand</th>
-				<th>Total</th>
+				<th>Total Net of VAT</th>
+				<th>Total w/ VAT</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -100,9 +124,11 @@ $res = $con->resultArray($con->Nection()->query($sql));
 				<tr>
 					<td><a href="javascript:viewTrans('<?php echo $row['skuid'] ?>','<?php echo $row['product_name'] ?>')"><?php echo $row['barcode'] ?></a></td>
 					<td><?= $row['item_desc']?></td>
+					<td><?=$row['lotexp_details']?></td>
 					<td style="text-align:right;"><?= number_format($row['cost'],2) ?></td>
 					<td style="text-align:center;"><?= $row['bal_total'] ?></td>
 					<td style="text-align:center;"><?= number_format($row['bal_total'] * $row['cost'],2) ?></td>
+					<td style="text-align:center;"><?= number_format(($row['bal_total'] * $row['cost'])*1.12,2) ?></td>
 				</tr>
 			<? $total+=($row['bal_total'] * $row['cost']);
 				
@@ -110,8 +136,9 @@ $res = $con->resultArray($con->Nection()->query($sql));
 		</tbody>
 		<tfoot>
 			<tr>
-				<th colspan="4">Sub Total</th>
+				<th colspan="5">Sub Total</th>
 				<th><?= number_format($total,2) ?></th>
+				<th><?= number_format($total*1.12,2) ?></th>
 			</tr>
 		</tfoot>
 	</table>

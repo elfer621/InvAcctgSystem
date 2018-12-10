@@ -53,9 +53,12 @@ require_once"../class/dbUpdate.php";
 $db=new dbConnect();
 $con=new dbUpdate();
 $db->openDb();
-$sql="select a.*,b.agent_name,b.id code from (select y.rep,sum(unitprice*qty) totselling,sum(cost*qty) totcost from tbl_sales_invoice_items x left join tbl_sales_invoice_header y on y.id=x.refid group by x.refid) a 
+$date = $_REQUEST['begdate']?"where refid in (select id from tbl_sales_invoice_header where date between '{$_REQUEST['begdate']}' and '{$_REQUEST['enddate']}')":"";
+$sql="select a.*,b.agent_name,b.id code from 
+	(select y.cust_id,y.rep,sum(unitprice*qty) totselling,sum(cost*qty) totcost from (select * from tbl_sales_invoice_items $date) x 
+		left join tbl_sales_invoice_header y on y.id=x.refid group by y.rep) a 
 left join req_agent b on a.rep=b.id 
-group by rep";
+";
 
 $res = $con->resultArray($con->Nection()->query($sql));
 ?>
@@ -64,11 +67,13 @@ $res = $con->resultArray($con->Nection()->query($sql));
 	<div style="clear:both;height:20px;"></div>
 	<fieldset>
 		<legend>Filter</legend>
+		<form method="post">
 		<div style="float:left;margin-right:10px;">Beg Date</div>
-		<input type="text" name="begdate" id="begdate" style="float:left;width:150px;margin-right:20px;"/>
+		<input type="text" name="begdate" id="begdate" style="float:left;width:150px;margin-right:20px;" value="<?=$_REQUEST['begdate']?$_REQUEST['begdate']:date('Y-m-01')?>"/>
 		<div style="float:left;margin-right:10px;">End Date</div>
-		<input type="text" name="enddate" id="enddate" style="float:left;width:150px;margin-right:20px;"/>
-		<input type="button" value="Execute" style="float:left;width:200px;"/>
+		<input type="text" name="enddate" id="enddate" style="float:left;width:150px;margin-right:20px;" value="<?=$_REQUEST['enddate']?$_REQUEST['enddate']:date('Y-m-d')?>"/>
+		<input type="submit" value="Execute" style="float:left;width:200px;"/>
+		</form>
 	</fieldset>
 	<div style="clear:both;height:20px;"></div>
 	<table class="tbl" cellspacing="0" cellpadding="0" width="100%">
@@ -90,7 +95,9 @@ $res = $con->resultArray($con->Nection()->query($sql));
 					<td><?= $row['agent_name']?></td>
 					<td style="text-align:right;"><?= number_format($row['totselling'],2) ?></td>
 					<td style="text-align:right;"><?= number_format($row['totcost'],2) ?></td>
-					<td><a href="#">Per Prod</a> | <a href="#">Per Cust</a></td>
+					<td style="text-align:center;">
+						<a href="javascript:viewReport('./sales_invoice_per_agent_summary_perproduct.php?rep=<?=$row['code']?>&begdate=<?=$_REQUEST['begdate']?>&enddate=<?=$_REQUEST['enddate']?>');">Per Prod</a> | 
+						<a href="javascript:viewReport('./sales_invoice_per_agent_summary_percust.php?rep=<?=$row['code']?>&begdate=<?=$_REQUEST['begdate']?>&enddate=<?=$_REQUEST['enddate']?>');">Per Cust</a></td>
 				</tr>
 			<? 
 				
@@ -99,6 +106,7 @@ $res = $con->resultArray($con->Nection()->query($sql));
 	</table>
 	<div id="dialog"></div>
 	<div id="dialog2"></div>
+	<div style="clear:both;height:20px;"></div>
 </body>
 <script>
 $(document).ready(function() {
@@ -121,6 +129,9 @@ function viewTrans(sku_id,prod_name){
 	$('#dialog').html('<div style="overflow:auto;max-height:360px;">'+htmlobj.responseText+'</div>');
 	$('#dialog').dialog('open');
 }
-
+function viewReport(page){
+	var win=window.open(page,'_blank');
+	win.focus();
+}
 </script>
 </html>

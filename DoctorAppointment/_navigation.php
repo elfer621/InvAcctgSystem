@@ -3,5 +3,5 @@
                 |
                 <a href="doctor.php">Doctor</a>
                 |
-                <a href="manager.php">Manager</a>
+                <a href="manager.php">Manage Sched</a>
             </div>

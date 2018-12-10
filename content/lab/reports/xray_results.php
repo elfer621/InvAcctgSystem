@@ -18,12 +18,12 @@
 			height:20px;
 			/*background-color:rgb(237,238,240);*/
 			text-align:center;
-			font-size:18px;
+			font-size:25px;
 			padding:1px;
 		}
 		
 		table.tbl td {
-			font-size:18px;
+			font-size:25px;
 			border-width: 1px;
 			border-style: none;
 			border-color: gray;
@@ -58,8 +58,8 @@ $con=new dbUpdate();
 $results = $db->getWHERE("*","lab_xray_results","where receipt='{$_REQUEST['receipt']}' and counter='{$_REQUEST['counter']}' and reading='{$_REQUEST['reading']}'");
 $info = explode("|",$results['patient_info']);
 ?>
-<body style="font-size:20px;">
-<div  style="font-family:Arial, Verdana, Geneva, Helvetica, Sans-Serif;width:1000px;margin:0 auto;">
+<body style="font-size:25px;">
+<div  style="font-family:Arial, Verdana, Geneva, Helvetica, Sans-Serif;width:900px;margin:0 auto;">
 <div style="border-bottom:1px solid #000;">
 	<img src="../../../images/csacci_logo.jpg" style="width:110px;height:110px;float:left;"/>
 	<div style="float:right;text-align:center;">

@@ -10,7 +10,7 @@ if($_POST){
 	// echo serialize($_POST['checkinfo'])."<br/>";
 	// print_r(unserialize(serialize($_POST['checkinfo'])))."<br/>";
 	// echo "<pre>";
-	// echo print_r($_POST);
+	// echo print_r($_REQUEST['entry']);
 	// echo "</pre>";
 	// exit;
 	mysql_query("BEGIN");
@@ -21,9 +21,9 @@ if($_POST){
 	}else{
 		$glref = $con->getNextJournalID($_REQUEST['type']);
 	}
-	$sql="insert into tbl_vouchering (id,center,date,type,payee,remarks,particular_array,amount_array,total,preparedby,`status`,typeinfo_array,reference,supporting_type) values 
-		('$glref','{$_SESSION['connect']}','{$_REQUEST['xdate']}','{$_REQUEST['type']}','{$_REQUEST['payee']}','{$_REQUEST['remarks']}','".serialize($_REQUEST['particular'])."','".serialize($_REQUEST['amt'])."','".str_replace( ',', '', $_REQUEST['xtotal'])."','".$_SESSION['xid']."','ForApproval','".serialize($_REQUEST[$_REQUEST['type']])."','{$_REQUEST['reference']}','{$_REQUEST['supporting_type']}') 
-		on duplicate key update `date`=values(`date`),center=values(center),type=values(type),payee=values(payee),remarks=values(remarks),particular_array=values(particular_array),amount_array=values(amount_array),total=values(total),typeinfo_array=values(typeinfo_array),reference=values(reference),supporting_type=values(supporting_type)";	
+	$sql="insert into tbl_vouchering (id,center,date,type,payee,remarks,particular_array,amount_array,total,preparedby,`status`,typeinfo_array,reference) values 
+		('$glref','{$_SESSION['connect']}','{$_REQUEST['xdate']}','{$_REQUEST['type']}','{$_REQUEST['payee']}','{$_REQUEST['remarks']}','".serialize($_REQUEST['particular'])."','".mysql_escape_string(serialize($_REQUEST['amt']))."','".str_replace( ',', '', $_REQUEST['xtotal'])."','".$_SESSION['xid']."','ForApproval','".serialize($_REQUEST[$_REQUEST['type']])."','{$_REQUEST['reference']}') 
+		on duplicate key update `date`=values(`date`),center=values(center),type=values(type),payee=values(payee),remarks=values(remarks),particular_array=values(particular_array),amount_array=values(amount_array),total=values(total),typeinfo_array=values(typeinfo_array),reference=values(reference)";	
 	$qry1 = mysql_query($sql);
 	if(!$qry1){
 		echo "Saving Vouchering: ".mysql_error();
@@ -99,12 +99,9 @@ if($_SESSION["vouchering"]['refid']){
 		"tbl_vouchering a left join tbl_user b on a.certifiedcorrect=b.id left join tbl_user c on a.approvedby=c.id",
 		"where a.id='{$_SESSION["vouchering"]['refid']}' and COALESCE(a.type,'')='{$_SESSION["vouchering"]['type']}'"); // and COALESCE(a.type,'') like '%{$_SESSION["vouchering"]['type']}%'
 	$journal = $db->resultArray("*","tbl_journal_entry","where refid='{$_SESSION["vouchering"]['refid']}' and COALESCE(type,'')='{$_SESSION["vouchering"]['type']}' order by dr desc"); // and COALESCE(a.type,'') like '%{$_SESSION["vouchering"]['type']}%'
-	//print_r($journal);
+	//print_r(unserialize($info['particular_array']));
 	unset($_SESSION["vouchering"]);
 }
-// echo "<pre>";
-// print_r(unserialize($info['particular_array']));
-// echo "</pre>";
 ?>
 <link rel="stylesheet" href="./js/chosen/chosen.css">
 <script src="./js/chosen/chosen.jquery.js" type="text/javascript"></script>
@@ -228,35 +225,50 @@ if($_SESSION["vouchering"]['refid']){
 				<fieldset>
 					<legend>Supporting Type</legend>
 					<div style="float:left;width:200px;">
-						<input type="radio" name="supporting_type" value="Cash Requirement"> Cash Requirement
+						<input type="radio" name="supporting_type" value="Cash Requirement" checked> Cash Requirement
 					</div>
 					<div style="float:left;width:200px;">
-						<input type="radio" name="supporting_type" value="Others" checked> Others
+						<input type="radio" name="supporting_type" value="Others"> Others
 					</div>
 				</fieldset>
 				<div id="particular_area">
 					<div style="display: flex;">
-					<fieldset style="align-items: stretch;width:100%;" >
+					<fieldset style="align-items: stretch;">
 						<legend>
 							Details In Particular 
 							<input onclick="addParticular()" type="button" value="+" style="width:20px;height:20px;"/>
 						</legend>
-						<table class="navigateablejournal" id="mytbl" cellspacing="0" cellpadding="0" width="100%" border="1">
-							<thead></thead>
+						<table class="navigateablejournal" id="mytbl" cellspacing="0" cellpadding="0" width="100%">
+							<thead>
+								<tr>
+									<th style="border:none;width:100px;">Date</th>
+									<th style="border:none;width:200px;">Payee</th>
+									<th style="border:none;width:400px;">Particular Desc</th>
+									<th style="border:none;">Amount</th>
+								</tr>
+							</thead>
 							<tbody>
-							<?php if($info['particular_array']){ 
-								$particular = unserialize($info['particular_array']);
-								$amt = unserialize($info['amount_array']);
-								for($x=0;$x<count($particular);$x++){
-									echo "<tr>
-										<td>{$particular[$x]['date']}</td>
-										<td>{$particular[$x]['payee']}</td>
-										<td>{$particular[$x]['particulars']}</td>
-										<td>".number_format($amt[$x],2)."</td>
-									</tr>";
-								}
-							 } ?>
+							
+							<?php 
+							$p = unserialize($info['particular_array']);
+							$a = unserialize($info['amount_array']);
+							$tot = 0;
+							for($x=0;$x<count($p);$x++){
+								echo '<tr>
+									<td><input type="text" name="particular['.$x.'][date]" value="'.$p[$x]['date'].'" style="width:100%;border:none;background:transparent;"/></td>
+									<td><input type="text" name="particular['.$x.'][payee]" value="'.$p[$x]['payee'].'" style="width:100%;border:none;background:transparent;"/></td>
+									<td><input type="text" name="particular['.$x.'][particulars]" value="'.$p[$x]['particulars'].'" style="width:100%;border:none;background:transparent;"/></td>
+									<td><input onchange="sumVoucherAmt()" type="text" class="amt" name="amt['.$x.']" style="text-align:right;background:transparent;border:none;" value="'.number_format($a[$x],2).'"/></td>
+								</tr>';
+								$tot+=$a[$x];
+							} ?>
 							</tbody>
+							<tfoot>
+								<tr>
+									<th colspan="3">Total</th>
+									<th><?=number_format($tot,2)?></th>
+								</tr>
+							</tfoot>
 						</table>
 					</fieldset>
 					</div>
@@ -587,7 +599,7 @@ function reject(id){
 		$('input[type="checkbox"]:checked').closest("tr").remove();
 	}
 });*/
-$("#mytbl, #journalTbl").bind('keydown',function(e){
+$("#journalTbl").bind('keydown',function(e){
 	var chCode = e.keyCode==0 ? e.charCode : e.keyCode;
 	if(chCode==46){ //pressing delete button
 		//$("tr.selectedjournal").remove();
@@ -665,35 +677,20 @@ function addParticular(){
 	switch($("input[name=supporting_type]:checked").val()){
 		case'Cash Requirement':
 			var txt = '<tr>\
-					<td><input type="checkbox" style="float:left;"></td>\
-					<td><input type="text" name="particular['+num+'][date]" value="" style="width:80px;border:none;background:transparent;"/></td>\
-					<td><input type="text" name="particular['+num+'][payee]" value="" style="width:200px;border:none;background:transparent;"/></td>\
+					<td><input type="text" name="particular['+num+'][date]" value="" style="width:100%;border:none;background:transparent;"/></td>\
+					<td><input type="text" name="particular['+num+'][payee]" value="" style="width:100%;border:none;background:transparent;"/></td>\
 					<td><input type="text" name="particular['+num+'][particulars]" value="" style="width:100%;border:none;background:transparent;"/></td>\
-					<td><input onchange="sumVoucherAmt()" type="text" class="amt" name="amt['+num+']" style="width:90px;text-align:right;background:transparent;border:none;" value="0.00"/></td>\
-				</tr>';
-			var tblhead='<tr>\
-				<th>&nbsp;</th>\
-				<th>Date</th>\
-				<th>Payee</th>\
-				<th>Particulars</th>\
-				<th>Amount</th>\
+					<td><input onchange="sumVoucherAmt()" type="text" class="amt" name="amt['+num+']" style="text-align:right;background:transparent;border:none;" value="0.00"/></td>\
 				</tr>';
 		break;
 		default:
 			var txt = '<tr>\
-					<td><input type="checkbox" style="float:left;"></td>\
 					<td><input type="text" name="particular[]" value="" style="width:100%;border:none;background:transparent;"/></td>\
 					<td><input onchange="sumVoucherAmt()" type="text" class="amt" name="amt[]" style="text-align:right;background:transparent;border:none;" value="0.00"/></td>\
-				</tr>';
-			var tblhead='<tr>\
-				<th>&nbsp;</th>\
-				<th>Particulars</th>\
-				<th>Amount</th>\
 				</tr>';
 		break;
 	}
 	
-	$("#mytbl thead").html(tblhead);
 	$("#mytbl tbody").prepend(txt);
 	sumVoucherAmt();
 }

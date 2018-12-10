@@ -81,8 +81,10 @@ $date2 = "and (`date` between '".trim($begdate[1])."' and '".trim($enddate[1])."
 $bf_sql = "select if(a.center='' or a.center is null,(select variable_values from settings where variable_name='session_connect'),a.center) cost_center,sum(dr-cr) balfwd from tbl_journal_entry a $where $date1";
 $recorded_center = "(select variable_values from settings where variable_name='session_connect') rec_center";
 $costcenter = "if(COALESCE(a.center,'')='',(select variable_values from settings where variable_name='session_connect'),a.center) cost_center";
-$sql = "select distinct a.id,a.*,b.reference,b.remarks,$costcenter,$recorded_center from tbl_journal_entry a 
-	left join tbl_vouchering b on a.refid=b.id and COALESCE(a.type,'')=COALESCE(b.type,'') $where $date2 order by a.type,a.date asc";
+$sql = "select distinct a.id,a.*,b.reference,b.remarks,$costcenter,$recorded_center,concat(emp.firstname,' ',emp.lastname) empname from tbl_journal_entry a 
+	left join tbl_vouchering b on a.refid=b.id and COALESCE(a.type,'')=COALESCE(b.type,'') 
+	left join tbl_employees emp on a.ar_nontrade_refid=emp.id 
+	$where $date2 order by a.type,a.date asc";
 $sql = str_replace("`date`","a.`date`",$sql);
 //echo $_SESSION['connect'];
 $arrs=array();
@@ -156,6 +158,7 @@ if($_SESSION['connect']){
 				<th>Running Balance</th>
 				<th>Check Ref.</th>
 				<th>Check Date</th>
+				<th>More Info</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -172,7 +175,9 @@ if($_SESSION['connect']){
 			<?php 
 			$rt=$balfwd?$balfwd:0;
 			usort($list, $db->make_cmp(['type' => "asc",'date' => "asc"]));
-			foreach($list as $key => $val){ ?>
+			foreach($list as $key => $val){ 
+			$rt+=($val['dr']-$val['cr']);
+			?>
 				<tr>
 					<td style="text-align:left;font-size:10px !important;"><?=($val['rec_center']==$val['cost_center']?$val['cost_center']:$val['rec_center']."|".$val['cost_center'])?></td>
 					<td style="text-align:right;font-size:10px !important;"><?=$val['date']?></td>
@@ -183,9 +188,10 @@ if($_SESSION['connect']){
 					<td style="text-align:left;"><?=$val['account_desc']?></td>
 					<td style="text-align:right;"><?=($val['dr']!=0?number_format($val['dr'],2):"")?></td>
 					<td style="text-align:right;"><?=($val['cr']!=0?number_format($val['cr'],2):"")?></td>
-					<td style="text-align:right;"><?=number_format(($rt+=($val['dr']-$val['cr'])),2)?></td>
+					<td style="text-align:right;"><?=$rt<0?"(".number_format(($rt * -1),2).")":number_format($rt,2)?></td>
 					<td style="text-align:right;"><?=$val['check_number']." ".$val['bank']?></td>
 					<td style="text-align:right;"><?=($val['check_date']=="0000-00-00"?"":$val['check_date'])?></td>
+					<td style="text-align:right;"><?=$val['empname']." ".$val['ar_nontrade_refinfo']." ".$val['ar_nontrade_remarks']?></td>
 				</tr>
 			<?php 
 			$total_dr+=$val['dr'];
@@ -198,7 +204,7 @@ if($_SESSION['connect']){
 				<td style="text-align:right;"><?=number_format($total_dr,2)?></td>
 				<td style="text-align:right;"><?=number_format($total_cr,2)?></td>
 				<td style="text-align:right;"><?=number_format($rt,2)?></td>
-				<td colspan="2"></td>
+				<td colspan="3"></td>
 			</tr>
 		</tfoot>
 	</table>

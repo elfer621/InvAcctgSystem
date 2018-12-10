@@ -184,9 +184,14 @@ switch($_REQUEST['execute']){
 				$_SESSION['persup'][$prod_name['supplier_id']]['cost']+=($row['qty'] * $row['cost']);
 				$_SESSION['persup'][$prod_name['supplier_id']]['selling']+=($row['qty'] * ($row['selling']==0?$sku['price']:$row['selling']));
 			}
+			
 			$_SESSION["{$_REQUEST['page']}_header"]=array(
-				'refid'=>$info['id'],'date'=>$info['date'],'status'=>$info['status'],
-				'supplier_id'=>$info['supplier_id'],'remarks'=>$info['remarks'],
+				'refid'=>$info['id'],
+				'stockin_date'=>$info['date'],
+				'status'=>$info['status'],
+				'supplier_id'=>$info['supplier_id'],
+				'remarks'=>$info['remarks'],
+				'sinum'=>$info['sinum'],
 				'glref'=>$info['glref'],
 				'total'=>$info['total']
 				);
@@ -202,7 +207,8 @@ switch($_REQUEST['execute']){
 				unset($_SESSION["{$_REQUEST['page']}_header"]['refid']);
 				$_SESSION["{$_REQUEST['page']}_header"]['stid']=$ref;
 				$_SESSION["{$_REQUEST['page']}_header"]['status']="Received from Branch";
-				$_SESSION["{$_REQUEST['page']}_header"]['supplier_id']=$branchesid[$info['from']];
+				//$_SESSION["{$_REQUEST['page']}_header"]['supplier_id']=$branchesid[$info['from']];
+				$_SESSION["{$_REQUEST['page']}_header"]['supplier_id']=$info['from'];
 			}
 			echo "success";
 		}else{

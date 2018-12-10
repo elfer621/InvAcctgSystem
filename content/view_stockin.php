@@ -35,7 +35,7 @@ $_SESSION['memory']["{$_REQUEST['page']}"]['enddate'] = $_REQUEST['enddate']?$_R
 $begdate = $_REQUEST['begdate']?$_REQUEST['begdate']:$_SESSION['memory']["{$_REQUEST['page']}"]['begdate'];
 $enddate = $_REQUEST['enddate']?$_REQUEST['enddate']:$_SESSION['memory']["{$_REQUEST['page']}"]['enddate'];
 $date = "where (`date` between '$begdate' and '$enddate')";
-$search = $_REQUEST['searchtxt']?"and `remarks` like '%".$_REQUEST['searchtxt']."%'":"";
+$search = $_REQUEST['searchtxt']?"and `remarks` like '%".$_REQUEST['searchtxt']."%' or sinum like '%".$_REQUEST['searchtxt']."%'":"";
 $supplier = $_REQUEST['supplier']?"and supplier_id='{$_REQUEST['supplier']}'":"";
 if($_REQUEST['stocktransfer']){
 	$db->openDb("main");
@@ -93,6 +93,7 @@ $sup = $db->resultArray("*","tbl_supplier","order by supplier_name asc");
 						<th>Status</th>
 						<th>Date</th>
 						<th>Supplier/Branch</th>
+						<th>SI#</th>
 						<th>Remarks</th>
 						<th>Total</th>
 						<?php if(!$_REQUEST['stocktransfer']){ ?>
@@ -123,18 +124,19 @@ $sup = $db->resultArray("*","tbl_supplier","order by supplier_name asc");
 							<?php
 							if($_REQUEST['stocktransfer']){
 								echo strtoupper($row['from']);
-							}elseif($row['status']=='Received from Branch'||$row['status']=='Transfer Stock'){
+							}elseif($row['status']=='Received from Branch'||$row['status']=='Transfer Stock'||$row['status']=='Received from Customer'){
 								$branches = $db->getWHERE("name","tbl_branch","where id='{$row['supplier_id']}'");
 								echo $branches['name'];
 							}elseif($row['status']=='Sold Stock'){
-								$supinfo = $db->getWHERE("*","tbl_customers","where cust_id='".$row['supplier_id']."'");
+								$supinfo = $db->getWHERE("*","tbl_customers","where cust_id='".$row['supplier_id']."'","main");
 								echo $supinfo['customer_name'];
 							}else{
-								$supinfo = $db->getWHERE("*","tbl_supplier","where id='".$row['supplier_id']."'");
+								$supinfo = $db->getWHERE("*","tbl_supplier","where id='".$row['supplier_id']."'","main");
 								echo $supinfo['supplier_name'];
 							}
 							?>
 						</td>
+						<td><?= $row['sinum']?></td>
 						<td><?= $row['remarks']?></td>
 						<td><?= number_format($row['total'],2) ?></td>
 						<?php
@@ -149,7 +151,7 @@ $sup = $db->resultArray("*","tbl_supplier","order by supplier_name asc");
 								<? if($_REQUEST['page']=="po"||$_REQUEST['po']){ ?>
 									<!--img onclick="viewReport('../reports/po.php?refid=')" src="../images/print.png" style="width:20px;height:20px;float:left;" />
 									<img onclick="viewReport('<?=$_SESSION['reports']['PO']['report_link']."?refid=".$row['id'] ?>')" src="../images/print.png" style="width:20px;height:20px;float:left;" /-->
-									<img onclick="viewReport('../reports/po_rtk.php?refid=<?php echo $row['id'] ?>')" src="../images/print.png" style="width:20px;height:20px;float:left;" />
+									<img onclick="viewReport('../reports/po<?=$_SESSION['repExtension']?>.php?refid=<?php echo $row['id'] ?>')" src="../images/print.png" style="width:20px;height:20px;float:left;" />
 								<? }elseif($_REQUEST['page']=="stockout" && $row['status']=='Transfer Stock'){ ?>
 									<img onclick="viewReport('../reports/transferstock.php?refid=<?php echo $row['id'] ?>')" src="../images/print.png" style="width:20px;height:20px;float:left;" />
 									<img onclick="viewReport('../reports/trust_receipt.php?refid=<?= $row['id'] ?>&page=<?=$_REQUEST['page']?>')" src="../images/cashdetails.png" title="Trust Receipt" style="width:20px;height:20px;float:left;" />
@@ -163,6 +165,7 @@ $sup = $db->resultArray("*","tbl_supplier","order by supplier_name asc");
 										<img onclick="printPreview_withForm('<?php echo $row['id'] ?>')" src="../images/print.png" style="width:20px;height:20px;float:left;" />
 									<? }else{ ?>
 										<img onclick="printPreview('<?php echo $row['id'] ?>')" src="../images/print.png" style="width:20px;height:20px;float:left;" />
+										<img src="../images/del.png" style="width:20px;height:20px;float:left;" onclick="delStockin('<?=$row['id'] ?>')"/>
 									<? } ?>
 								<? } ?>
 								<!--img onclick="viewReport('../reports/vouchering.php?refid=<?=$row['glref'] ?>&center=<?=$_SESSION['connect']?>&type=GJ')" src="../images/search.png" style="width:20px;height:20px;float:left;" /-->
@@ -250,6 +253,22 @@ $sup = $db->resultArray("*","tbl_supplier","order by supplier_name asc");
 		if (r == true){
 			$.ajax({
 				url: 'pos_ajax_stockin.php?execute=delStockout&refid='+val,
+				type:"POST",
+				success:function(data){
+					if(data=="success"){
+						window.location.reload();
+					}else{
+						alert(data);
+					}
+				}
+			});
+		}
+	}
+	function delStockin(val){
+		var r = confirm("Are you sure you want to delete this?");
+		if (r == true){
+			$.ajax({
+				url: 'pos_ajax_stockin.php?execute=delStockin&refid='+val,
 				type:"POST",
 				success:function(data){
 					if(data=="success"){

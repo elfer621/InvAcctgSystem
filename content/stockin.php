@@ -1,4 +1,5 @@
 <?php
+
 // ini_set('display_errors', 1);
 // ini_set('log_errors', 1);
 // ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
@@ -10,6 +11,7 @@ $tbl_header="{$lokasion}_{$_REQUEST['page']}_header";
 $tbl_items="{$lokasion}_{$_REQUEST['page']}_items";
 $location = "http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 $sessiontype = $_REQUEST['page'];
+//print_r($_SESSION[$sessiontype.'_header']);
 if($_POST['stockin_date']){
 	if((isset($_SESSION['connect'])&&$_SESSION['connect']!='warehouse') or ($_SESSION[$sessiontype.'_header']['status']=='Transfer Stock') or ($_SESSION[$sessiontype.'_header']['status']=='Received from Branch')){ 
 		$x = $db->getWHERE("name","tbl_branch","where cust_id='{$_REQUEST['supplier_id']}'");
@@ -144,23 +146,25 @@ if($_POST['stockin_date']){
 	
 	if($_REQUEST['page']=="stockout"){
 		if($_REQUEST['status']=="Transfer Stock"){
+			
 			switch($_REQUEST['supplier_id']){
 				case 1:
-					$to="ucbanilad";
+					$to="main";
 				break;
 				case 2:
-					$to="uclm";
+					$to="cagayan";
 				break;
 				case 3:
-					$to="ucmain";
+					$to="iloilo";
 				break;
 				case 4:
-					$to="ucmambaling";
+					$to="bacolod";
 				break;
 				case 5:
-					$to="warehouse";
+					$to="davao";
 				break;
 			}
+			
 			$con->transferStock('main',$to,"tbl_stockout_header","tbl_stocktransfer_header",$refid,"id");
 			$con->transferStock('main',$to,"tbl_stockout_items","tbl_stocktransfer_items",$refid,"stockin_refid");
 		}
@@ -197,7 +201,7 @@ $qrysup = mysql_query("select * from tbl_supplier");
 			<div style="float:left;border:1px solid #000;margin-right:5px;padding:5px;">
 				<div style="float:left;margin-right:5px;">
 					<div style="float:left;margin-right:10px;width:80px;">Date:</div>
-					<input style="float:left;width:196px;" type="text" name="stockin_date" id="stockin_date" value="<?php echo $_SESSION[$sessiontype.'_header']['date']?$_SESSION[$sessiontype.'_header']['date']:date('Y-m-d'); ?>"/>
+					<input style="float:left;width:196px;" type="text" name="stockin_date" id="stockin_date" value="<?php echo $_SESSION[$sessiontype.'_header']['stockin_date']?$_SESSION[$sessiontype.'_header']['stockin_date']:date('Y-m-d'); ?>"/>
 				</div>
 				<?php if($_REQUEST['page']=='po'){ ?>
 				<div style="float:left;margin-right:5px;">
@@ -223,29 +227,33 @@ $qrysup = mysql_query("select * from tbl_supplier");
 				<?php }?>
 				
 				<?php 
-				if((isset($_SESSION['connect'])&&$_SESSION['connect']!='warehouse') or ($_SESSION[$sessiontype.'_header']['status']=='Transfer Stock') or ($_SESSION[$sessiontype.'_header']['status']=='Received from Branch')){ 
+				//(isset($_SESSION['connect'])&&$_SESSION['connect']!='warehouse') or 
+				if(($_SESSION[$sessiontype.'_header']['status']=='Transfer Stock') 
+					or ($_SESSION[$sessiontype.'_header']['status']=='Received from Branch')or ($_SESSION[$sessiontype.'_header']['status']=='Received from Customer')){ 
 					$branch_sup=$db->resultArray("id,name","tbl_branch","where name!='{$_SESSION['connect']}'");
-					$lbl="Selling";
+					//$lbl="Selling";
+					$lbl="Cost";
 				}elseif($_SESSION[$sessiontype.'_header']['status']=='Sold Stock'){
-					$branch_sup=$db->resultArray("cust_id id,customer_name name","tbl_customers","order by customer_name asc");
+					$branch_sup=$db->resultArray("cust_id id,customer_name name","tbl_customers","order by customer_name asc","main");
 					$lbl="Selling";
 				}else{
-					$branch_sup=$db->resultArray("id,supplier_name name","tbl_supplier","order by supplier_name asc");
+					$branch_sup=$db->resultArray("id,supplier_name name","tbl_supplier","order by supplier_name asc","main");
 					$lbl="Cost";
 				}
+				
 				?>
 				<div style="clear:both;height:5px;"></div>
-				<div style="float:left;margin-right:10px;width:80px;">Brnch/Supplr:</div>
+				<div style="float:left;margin-right:10px;width:80px;" id="suplabel">Brnch/Supplr:</div>
 				<select name="supplier_id" id="supplier_id" style="float:left;width:200px;">
 					<option value="">Select</option>
 					<?php foreach($branch_sup as $key=>$val){ ?>
-						<option <?=$_SESSION[$sessiontype.'_header']['supplier_id']==$val['id']?'selected':''?> value="<?=$val['id']?>"><?=$val['name']?></option>
+						<option <?=$_SESSION[$sessiontype.'_header']['supplier_id']==$val['id']||$_SESSION[$sessiontype.'_header']['supplier_id']==$val['name']?'selected':''?> value="<?=$val['id']?>"><?=$val['name']?></option>
 					<?php } ?>
 				</select>
 				
 				<div style="float:left;margin-left:20px;">
-					<div style="float:left;margin-right:5px;width:72px;text-align:left;"><?=strtoupper($_REQUEST['page'])?> #:</div>
-					<input style="float:left;width:133px;" type="text" name="refid" id="refid" value="<?php echo $_SESSION[$sessiontype.'_header']['refid']?$_SESSION[$sessiontype.'_header']['refid']:""; ?>"/>
+					<div style="float:left;margin-right:5px;width:72px;text-align:left;"><?=strtoupper($_REQUEST['page'])?>#:</div>
+					<input readonly style="float:left;width:133px;" type="text" name="refid" id="refid" value="<?php echo $_SESSION[$sessiontype.'_header']['refid']?$_SESSION[$sessiontype.'_header']['refid']:""; ?>"/>
 				</div>
 				<?php if($_REQUEST['page']=="stockin"){ ?>
 					<div style="clear:both;height:5px;"></div>
@@ -288,6 +296,9 @@ $qrysup = mysql_query("select * from tbl_supplier");
 				<input id="bt5" class="buthov" type="button" value="Add Customer" onclick="addcustomer();" style="height:40px;width:150px;"/>
 				<input id="bt3" class="buthov" type="button" value="Add NewProd" onclick="prodAdd();" style="height:40px;width:150px;"/>
 				<input id="bt4" class="buthov" type="button" value="Searching" onclick="searching();" style="height:40px;width:150px;"/>
+				<?php if($_SESSION['settings']['system_name']=="RTK"){ ?>
+				<input id="bt10" class="buthov" type="button" value="Lot# & Exp" onclick="lotexpdateAdd();" style="height:40px;width:150px;"/>
+				<?php } ?>
 				<!--button id="bt4" class="buthov" type="button" onclick="totalDiscounting()" style="height:40px;width:150px;">Total D<span style="font-weight:bold;text-decoration:underline;">i</span>scounting</button-->
 				<?if($_REQUEST['page']=='stockin'){?>
 					<?php if($_SESSION['connect']=='warehouse'){ ?>
@@ -336,7 +347,8 @@ $qrysup = mysql_query("select * from tbl_supplier");
 							$change="";$xtotal=0;$count=1; 
 							foreach($db->subval_sort($_SESSION[$sessiontype],'count',arsort) as $val){ 
 								if(($_SESSION[$sessiontype.'_header']['status']=='Transfer Stock') or ($_SESSION[$sessiontype.'_header']['status']=='Received from Branch')){
-									$pricecost=$val['price'];
+									//$pricecost=$val['price'];
+									$pricecost=$val['cost'];
 								}else{
 									$pricecost=$val['cost'];
 								}
@@ -419,6 +431,19 @@ function dynamicSup(type){
 		type:"POST",
 		success:function(data){
 			$("#supplier_id").html(data);
+			switch(type){
+				case "Sold Stock":
+					$("#suplabel").html("Customer");
+				break;
+				case"Received from Supplier":
+				case "Return Stock":
+					$("#suplabel").html("Supplier");
+				break;
+				case"Received from Branch":
+					$("#suplabel").html("Branch");
+				break;
+			}
+			
 		}
 	});
 }
@@ -705,5 +730,11 @@ function costchange(val,newcost){
 			}
 		}
 	});
+}
+function lotexpdateAdd(){
+	var skuid = $("#mytbl tr.selected").find("td:eq(7)").html();
+	var refid = $("#refid").val();
+	clickDialog("dialogbox2",400,300,"lotexpdateAdd&skuid="+skuid+"&refid="+refid,"Lot # & Exp Date");
+	jQuery.tableNavigation();
 }
 </script>

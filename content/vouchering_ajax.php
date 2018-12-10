@@ -82,6 +82,23 @@ switch($_REQUEST['execute']){
 					'<option value="">Select Cost Center</option>'.$option.'</select>
 					<div style="clear:both;height:5px;"></div>';
 			break;
+			case'ACCOUNTS RECEIVABLE - NONTRADE':
+				$option="";
+				$customer=$db->resultArray("*,concat(firstname,' ',lastname) name","tbl_employees","");
+				foreach($customer as $k=>$v){
+					$option.= "<option ".($val['ar_nontrade_refid']==$v['id']?"selected":"")." value='".$v['id']."'>".$v['name']."</option>";
+				}
+				$modal = '<div style="float:left;margin-right:10px;width:100px;">Employee Name</div>'.
+					'<select name="entry['.$count.'][ar_refid]" style="float:left;width:250px;">'.
+					'<option value="">Select Employee</option>'.$option.'</select>
+					<div style="clear:both;height:5px;"></div>'.
+					'<div style="float:left;margin-right:10px;width:100px;">Reference Number</div>'.
+					'<input type="text" name="entry['.$count.'][ar_nontrade_refinfo]" value="'.$val['ar_nontrade_refinfo'].'" style="float:left;width:250px;"/>'.
+					'<div style="clear:both;height:5px;"></div>'.
+					'<div style="float:left;margin-right:10px;width:100px;">Remarks</div>'.
+					'<input type="text" name="entry['.$count.'][ar_nontrade_remarks]" value="'.$val['ar_nontrade_remarks'].'" style="float:left;width:250px;"/>'.
+					'<div style="clear:both;height:5px;"></div>';
+			break;
 		}
 		if($val['account_group']=="EXPENSES"){
 			$option="";

@@ -20,10 +20,12 @@ $qry =  mysql_query($sql);
 	<legend>Menu</legend>
 	<input id="bt1" class="buthov" type="button" value="Add Customer" style="float:left;height:40px;width:200px;" onclick="addcustomer()"/>
 	<?php if($_SESSION['restrictionid']!=2){ ?>
-		<input id="bt2" class="buthov" type="button" value="View Trans" style="float:left;height:40px;width:200px;" onclick="viewTrans()"/>
+		<input id="bt2" class="buthov" type="button" value="View Transactions" style="float:left;height:40px;width:200px;" onclick="viewTrans()"/>
 		<input id="bt3" class="buthov" type="button" value="Debit Memo" style="float:left;height:40px;width:200px;" onclick="adjustment()"/>
 	<? } ?>
+	<?php if($_SESSION['restrictionid']!=9){ ?>
 	<input id="bt4" class="buthov" type="button" value="Collection Encode" style="float:left;height:40px;width:200px;" onclick="payment_received()"/>
+	<? } ?>
 	<input id="bt5" class="buthov" type="button" value="Credit Memo (-)" style="float:left;height:40px;width:200px;" onclick="credit_memo()"/>
 	<input id="bt1" class="buthov" type="button" value="Collection Reports" style="float:left;height:40px;width:200px;" onclick="viewReport('reports/cust_trans<?=$_SESSION['repExtension']?>.php');"/>
 	<input id="bt2" class="buthov" type="button" value="Undelivered Receipt" style="float:left;height:40px;width:200px;" onclick="custTrans_Rep('undelivered_receipt')"/>
@@ -37,6 +39,7 @@ $qry =  mysql_query($sql);
 <script src="./js/chosen/chosen.jquery.js" type="text/javascript"></script>
 <script src="./js/chosen/docsupport/prism.js" type="text/javascript" charset="utf-8"></script-->
 <script type="text/javascript">
+	
 	var config = {
 	  '.chosen-select'           : {width: "40%",style:"float:left;height:40px;"}
 	}
@@ -46,6 +49,7 @@ $qry =  mysql_query($sql);
 	$(".chosen-select").chosen().change(function(){
 		showCustdetails(this.value);
 	});
+	
 	function showCustdetails(refid){
 		$.ajax({
 			url: './content/pos_ajax.php?execute=custdetails',
@@ -116,7 +120,7 @@ $qry =  mysql_query($sql);
 		if(!acctid){
 			alert("Please select customer first...");
 		}else{
-			clickDialog('dialogbox2',900,500,'payment_received&acctid='+acctid,'Customer Payment Received');
+			clickDialog('dialogbox2',950,600,'payment_received&acctid='+acctid,'Customer Payment Received');
 		}
 	}
 	function credit_memo(){
@@ -124,7 +128,7 @@ $qry =  mysql_query($sql);
 		if(!acctid){
 			alert("Please select customer first...");
 		}else{
-			clickDialog('dialogbox2',400,300,'credit_memo&acctid='+acctid,'Credit Memo');
+			clickDialog('dialogbox2',900,400,'adjustment&type=credit_memo&acctid='+acctid,'Credit Memo');
 		}
 	}
 	function adjustment(){
@@ -132,7 +136,7 @@ $qry =  mysql_query($sql);
 		if(!acctid){
 			alert("Please select customer first...");
 		}else{
-			clickDialog('dialogbox2',400,300,'adjustment&acctid='+acctid,'Adjustment');
+			clickDialog('dialogbox2',900,400,'adjustment&type=debit_memo&acctid='+acctid,'Adjustment');
 		}
 	}
 </script>

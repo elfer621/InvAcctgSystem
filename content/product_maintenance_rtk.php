@@ -1,6 +1,6 @@
 <?php
 //$_SESSION['connect']="main";
-//$db->openDb("main");
+$db->openDb("main");
 if($auto_barcode){
 	$code = $db->genSKU(8);
 }
@@ -19,7 +19,7 @@ if($_POST['save_itemprod']){
 	mysql_query("BEGIN");
 	$insert_prod="insert into tbl_product_name (sku_id,product_name,base_unit,supplier_id,category_id,manufacturer_id,
 			school_level,subject_name,subjtype,tax_type,hidden,lotno,expdate) values 
-			('".$skuid."','".mysql_real_escape_string($_REQUEST['product_name'])."','".$_REQUEST['unit']."','".$_REQUEST['supplier_name']."','".$_REQUEST['category']."','".$_REQUEST['manufacturer_name']."','".
+			('".mysql_real_escape_string($skuid)."','".mysql_real_escape_string($_REQUEST['product_name'])."','".mysql_real_escape_string($_REQUEST['unit'])."','".$_REQUEST['supplier_name']."','".$_REQUEST['category']."','".$_REQUEST['manufacturer_name']."','".
 			$_REQUEST['sch_level']."','".$subj[0]."','".$subj[1]."','{$_REQUEST['tax_type']}','{$_REQUEST['hide']}','{$_REQUEST['lotno']}','{$_REQUEST['expdate']}') 
 			on duplicate key update hidden=values(hidden),product_name=values(product_name),base_unit=values(base_unit),supplier_id=values(supplier_id),
 			category_id=values(category_id),manufacturer_id=values(manufacturer_id),school_level=values(school_level),
@@ -27,7 +27,7 @@ if($_POST['save_itemprod']){
 	$qry_prod = mysql_query($insert_prod);
 	if($qry_prod){
 		$qry_bcode=mysql_query("insert into tbl_barcodes (sku_id,barcode,price,cost,unit) values 
-			('".$skuid."','".$_REQUEST['xbarcode']."','".$_REQUEST['price']."','".$_REQUEST['cost']."','".$_REQUEST['unit']."') 
+			('".mysql_real_escape_string($skuid)."','".mysql_real_escape_string($_REQUEST['xbarcode'])."','".$_REQUEST['price']."','".$_REQUEST['cost']."','".mysql_real_escape_string($_REQUEST['unit'])."') 
 			on duplicate key update barcode=values(barcode),price=values(price),cost=values(cost),unit=values(unit)");
 		if(!$qry_bcode){
 			$_SESSION['error'] = mysql_error();

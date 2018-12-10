@@ -64,9 +64,9 @@ switch($_REQUEST['page']){
 	case'gl':
 	case'vouchering':
 		switch($_SESSION['settings']['system_name']){
-			case'TKC':
-				$dashboard="./content/vouchering_tkc.php";
-			break;
+			// case'TKC':
+				// $dashboard="./content/vouchering_tkc.php";
+			// break;
 			default:
 				$dashboard="./content/vouchering.php";
 			break;
@@ -144,7 +144,8 @@ switch($_REQUEST['page']){
 	case'dynamic_invoicing':
 		switch($_SESSION['settings']['system_name']){
 			case"TKC":
-				$dashboard ="./content/tkc/dynamic_invoicing.php";
+				//$dashboard ="./content/tkc/dynamic_invoicing.php";
+				$dashboard ="./content/rtk/dynamic_invoicing.php";
 			break;
 			case"RTK":
 				$dashboard ="./content/rtk/dynamic_invoicing.php";
@@ -193,6 +194,10 @@ switch($_REQUEST['page']){
 								case"CSACCI":
 									include_once"dashboard_branch_lab.php";
 								break;
+								case"RTK":
+									include_once"dashboard_main_rtk.php";
+									$_SESSION['repExtension']="_rtk";
+								break;
 								default:
 									include_once"dashboard_branch.php";
 								break;
@@ -214,6 +219,7 @@ switch($_REQUEST['page']){
 								case"TKC":
 									include_once"dashboard_main_tkc.php";
 									$_SESSION['repExtension']="_tkc";
+									$repExtension="_tkc";
 								break;
 								case"RTK":
 									include_once"dashboard_main_rtk.php";
@@ -225,6 +231,7 @@ switch($_REQUEST['page']){
 								break;
 								default:
 									include_once"dashboard_main.php";
+									$_SESSION['repExtension']="";
 								break;
 							}
 						}

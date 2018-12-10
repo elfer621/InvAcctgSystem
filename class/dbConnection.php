@@ -141,13 +141,28 @@ class dbConnect{
 	function closeDb(){
 			mysql_close($this->con);
 		}
-	function getWHERE($column,$tbl,$condition){
+	function getWHERE($column,$tbl,$condition,$con=null){
+			if($con){
+				$this->openDb($con);
+			}
 			$qry = mysql_query("select $column from $tbl $condition limit 1");
 			
 			if(!$qry){
 				//echo mysql_error();
 			}else{
 				return mysql_fetch_assoc($qry);
+			}
+		}
+	function query($sql,$con=null){
+			if($con){
+				$this->openDb($con);
+			}
+			$qry = mysql_query($sql);
+			
+			if(!$qry){
+				return false;
+			}else{
+				return true;
 			}
 		}
 	function strpos_arr($haystack, $needle) { //find string in array
@@ -164,7 +179,10 @@ class dbConnect{
 		}
 		return $result;
 	}
-	function resultArray($column,$tbl,$condition){
+	function resultArray($column,$tbl,$condition,$con=null){
+			if($con){
+				$this->openDb($con);
+			}
 			$qry = mysql_query("select $column from $tbl $condition");
 			while($row = mysql_fetch_array($qry, MYSQL_BOTH)){
 				$result[] = $row;
@@ -419,13 +437,35 @@ class dbConnect{
 	}
 	function saveCustTrans($data=array()){
 		$sql = "insert into tbl_customers_trans set 
+			date='".(!empty($data['date'])?$data['date']:date('Y-m-d'))."',
 			cust_id='{$data['cust_id']}',
 			receipt='{$data['receipt']}',
 			counter='{$data['counter']}',
 			reading='{$data['reading']}',
 			transtype='{$data['transtype']}',
 			details='{$data['details']}',
+			".($data['more_details']?"more_details='{$data['more_details']}',":"")."
 			amount='{$data['amount']}'";
+		$qry = mysql_query($sql);
+		if(!$qry){
+			echo mysql_error();
+			return false;
+		}else{
+			return true;
+		}
+	}
+	function editCustTrans($data=array()){
+		$sql = "update tbl_customers_trans set 
+			date='".(!empty($data['date'])?$data['date']:date('Y-m-d'))."',
+			cust_id='{$data['cust_id']}',
+			receipt='{$data['receipt']}',
+			counter='{$data['counter']}',
+			reading='{$data['reading']}',
+			transtype='{$data['transtype']}',
+			details='{$data['details']}',
+			".($data['more_details']?"more_details='{$data['more_details']}',":"")."
+			amount='{$data['amount']}'
+			where receipt='{$data['receipt']}'";
 		$qry = mysql_query($sql);
 		if(!$qry){
 			echo mysql_error();
@@ -526,24 +566,27 @@ class dbConnect{
 		return $sql;
 	}
 	function savingEntry2($refid,$array,$tbl){ //used in stockin page only
+		$del = mysql_query("delete from $tbl where stockin_refid='{$refid}'");
 		$sql_produpdate = "insert into tbl_product_name (sku_id,base_inv) values ";
-		$flag = false;
+			$flag = false;
+
+			foreach($this->subval_sort($array,'count',arsort) as $key => $val){
+				if($flag){$sql_items.=",";$sql_produpdate.=",";}
+				if($val['id']){$id_item1="{$val['id']},";}else{$id_item1="'',";}
+				$sql_items .= "($id_item1 $refid,'".$val['count']."','".$val['bcode']."','".mysql_real_escape_string($val['prod_name'])."',".$val['qty'].",
+				'".$val['unit']."','".$val['cost']."','".$val['discount']."','".((($val['cost']*$val['qty']))*(1-$val['discount']))."',
+				'".$val['sku']."','".$val['divmul']."','".$val['price']."')";
+				$sql_produpdate.="('{$val['sku']}',({$this->sqlUpdateInv($val['sku'])}))";
+				$flag=true;
+			}
 		
-		
-		foreach($this->subval_sort($array,'count',arsort) as $key => $val){
-			//if($flag){$sql_items.=",";$sql_produpdate.=",";}
-			if($val['id']){$id_item1="{$val['id']},";}else{$id_item1="'',";}
-			$sql_items .= "($id_item1 $refid,'".$val['count']."','".$val['bcode']."','".mysql_real_escape_string($val['prod_name'])."',".$val['qty'].",
-			'".$val['unit']."','".$val['cost']."','".$val['discount']."','".((($val['cost']*$val['qty']))*(1-$val['discount']))."',
-			'".$val['sku']."','".$val['divmul']."','".$val['price']."')";
-			$sql_produpdate.="('{$val['sku']}',({$this->sqlUpdateInv($val['sku'])}))";
-			//$flag=true;
-			
 			$sql_header = "insert into $tbl (id,stockin_refid,count,barcode,item_desc,qty,unit,cost,discount,total,skuid,divmul,selling) values ";
-			$sql_items .= "ON DUPLICATE KEY UPDATE
+			$sql_items .= " ON DUPLICATE KEY UPDATE
 				qty=VALUES(qty),cost=values(cost),discount=values(discount),total=values(total),selling=values(selling),skuid=values(skuid)";
 			$sql_produpdate.="ON DUPLICATE KEY UPDATE base_inv=values(base_inv)";
 			$qry_items = mysql_query($sql_header.$sql_items);
+			//echo $sql_header.$sql_items."<br/>";exit;
+			
 			if($qry_items){
 				//return true;
 				$produpdate = mysql_query($sql_produpdate);
@@ -557,8 +600,6 @@ class dbConnect{
 				$_SESSION['error'].="ItemSaving 2.) ".mysql_error().$sql_header.$sql_items."<br/><hr/><br/>";
 				return false;
 			}
-			
-		}
 		
 	}
 	function delProd($id,$tbl){
@@ -677,6 +718,11 @@ class dbConnect{
 		$qry = mysql_query("select max($colid) as id from $tblname limit 1");
 		$info = mysql_fetch_assoc($qry);
 		return $info['id'] + 1;
+	}
+	function getNextSI(){
+		$qry = mysql_query("select id from tbl_sales_invoice_header order by counting desc limit 1");
+		$info = mysql_fetch_assoc($qry);
+		return "A".$this->customeFormat(filter_var($info['id'], FILTER_SANITIZE_NUMBER_INT) + 1,6);
 	}
 	function readingNext($counter){
 		$qry = mysql_query("select max(reading_num) as readingnum from tbl_reading where counter='".$counter."' limit 1");

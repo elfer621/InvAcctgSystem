@@ -1,4 +1,5 @@
 <?php
+echo $_SESSION['error'];
 $time = microtime(true);
 ob_start("ob_gzhandler");
 error_reporting(0);
@@ -140,7 +141,7 @@ if(isset($_REQUEST['xlogin'])){
 		echo "<script>alert('Wrong password!');</script>";
 	}
 }
-if(!isset($_SESSION['xid']) or !isset($_SESSION['settings'])){
+if((!isset($_SESSION['xid']) or !isset($_SESSION['settings']))&&$_REQUEST['page']!="estore"){
 	echo "<script>window.onload=function(){
 		$('#xlogin').dialog({
 			autoOpen: false,
@@ -194,86 +195,7 @@ if($_POST['changepass']){
 	}
 	
 }
-/*
-if($_SESSION['restrictionid']==1||$_SESSION['restrictionid']==6||$_SESSION['restrictionid']==7){ //admin rights
-	switch($_REQUEST['page']){
-		case'soa_create':
-			$content="./content/soa_create.php";
-		break;
-		case'package_create':
-			$content="./content/package_create.php";
-		break;
-		case'gl':
-		case'vouchering':
-			$content="./content/vouchering.php";
-		break;
-		case'stockin':
-			$content="./content/stockin.php";
-		break;
-		case'stockout':
-			$content="./content/stockin.php";
-		break;
-		case'po':
-			$content="./content/stockin.php";
-		break;
-		case'sales':
-			$content ="pos_content.php";
-		break;
-		case'prod_maintenance_whole':
-			$content="./content/product_maintenance.php";
-		break;
-		case'touchscreen_prodlist':
-			$content ="./touchscreen/product_list.php";
-		break;
-		default:
-			$content ="dashboard.php";
-		break;
-	}
-}else if($_SESSION['restrictionid']==2 or $_SESSION['restrictionid']==3 or $_SESSION['restrictionid']==4){
-	switch($_REQUEST['page']){
-		case'prod_maintenance_whole':
-			$content="./content/product_maintenance.php";
-		break;
-		case'sales':
-			$content ="pos_content.php";
-		break;
-		case'stockout':
-			$content="./content/stockin.php";
-		break;
-		case'stockin':
-			$content="./content/stockin.php";
-		break;
-		case'touchscreen_prodlist':
-			$content ="./touchscreen/product_list.php";
-		break;
-		default:
-			if($view==2 || $view==3){
-				$content ="dashboard.php";
-			}else{
-				$content ="pos_content.php";
-			}
-		break;
-	}
-	
-}else if($_SESSION['restrictionid']==5){ //StockIn restriction only...
-	//$content="./content/stockin.php";
-	switch($_REQUEST['page']){
-		case'prod_maintenance_whole':
-			$content="./content/product_maintenance.php";
-		break;
-		case'stockout':
-			$content="./content/stockin.php";
-		break;
-		case'stockin':
-			$content="./content/stockin.php";
-		break;
-		default:
-			$content="./content/rr_dashboard.php";
-		break;
-	}
-}else{
-	$content ="dashboard.php";
-}*/
+
 switch($_REQUEST['page']){
 	case'order':
 		$content ="pos_content.php";
@@ -282,6 +204,9 @@ switch($_REQUEST['page']){
 	case'sales':
 		$content ="pos_content.php";
 		//$content ="pos_content_rber.php";
+	break;
+	case'estore':
+		$content ="estore.php";
 	break;
 	default:
 		$content ="dashboard.php";

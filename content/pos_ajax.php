@@ -18,8 +18,13 @@ if(!$con){
 }*/
 $readingNum = $db->getReadingnum($_SESSION['counter_num']);
 switch($_REQUEST['execute']){
+	case'changebranch':
+		$_SESSION['connect']=$_REQUEST['branchname'];
+		echo "success";
+	break;
 	case'popUpforReports':
 		switch($_REQUEST['reptype']){
+	
 			case'compliance':
 				$complist = $db->resultArray("distinct company_name","data_teletech_patient","where year=year(now())");
 				$dataref = $db->resultArray("distinct data_reference","data_teletech_patient","where year=year(now())");
@@ -424,7 +429,7 @@ switch($_REQUEST['execute']){
 	case'dynamic_supplier':
 		if($_REQUEST['type']=="Received from Supplier"||$_REQUEST['type']=="Return Stock"||$_REQUEST['type']=="PO"){ 
 			$qrysup = mysql_query("select * from tbl_supplier order by supplier_name asc");
-		?>111
+		?>
 			<option value="">Select Supplier</option>
 			<?php while($rowsup = mysql_fetch_assoc($qrysup)){ ?>
 				<option <?=$_SESSION[$sessiontype.'_header']['supplier_id']==$rowsup['id']?'selected':''?> value="<?=$rowsup['id']?>"><?=$rowsup['supplier_name']?></option>
@@ -1001,18 +1006,18 @@ switch($_REQUEST['execute']){
 			// FROM tbl_stockout_items LEFT JOIN tbl_stockout_header ON tbl_stockout_items.stockin_refid=tbl_stockout_header.id WHERE skuid='$sku_id')
 			// )as tbl order by dated asc,stat desc;";
 		$sql = "select * from (
-		(SELECT DATE_FORMAT(tbl_stockin_header.date,'%Y-%m-%d') AS dated,
+		(SELECT null as siref,DATE_FORMAT(tbl_stockin_header.date,'%Y-%m-%d') AS dated,
 			tbl_stockin_items.item_desc prodname,
 			qty,unit,CONCAT('IN') AS stat,concat(tbl_stockin_header.status,' REF:',stockin_refid,' ',tbl_stockin_header.remarks) remarks,divmul,concat(0) selling,cost,tbl_stockin_items.id,concat('tbl_stockin_items') as tblname
 			FROM tbl_stockin_items LEFT JOIN tbl_stockin_header ON tbl_stockin_items.stockin_refid=tbl_stockin_header.id WHERE skuid='$sku_id') 
-		UNION (SELECT DATE_FORMAT(TIMESTAMP,'%Y-%m-%d') AS dated,
+		UNION (SELECT null as siref,DATE_FORMAT(TIMESTAMP,'%Y-%m-%d') AS dated,
 			item_desc prodname,qty,unit,CONCAT('OUT') AS stat,
 			CONCAT('<a href=\"javascript:viewReceipt(',receipt,',',reading,',',counter,');\">Receipt: ',receipt,' Counter: ',counter,' Reading: ',reading,'</a>') AS remarks,divmul,selling,cost,{$tbl}_sales_items.id,concat('{$tbl}_sales_items') as tblname 
 			FROM {$tbl}_sales_items WHERE skuid='$sku_id' $reading)";
 		switch($_SESSION['settings']['system_name']){
 			case"TKC":
 			case"RTK":
-				$sql.=" UNION (SELECT DATE_FORMAT(date,'%Y-%m-%d') AS dated,
+				$sql.=" UNION (SELECT refid as siref,DATE_FORMAT(date,'%Y-%m-%d') AS dated,
 					item_spec prodname,qty,unit,CONCAT('OUT') AS stat,
 					CONCAT(' Sales Invoice #',refid) AS remarks,divmul,unitprice,0 cost,refid,concat('tbl_sales_invoice') as tblname 
 					FROM (select a.*,b.date from tbl_sales_invoice_items a 
@@ -1020,7 +1025,7 @@ switch($_REQUEST['execute']){
 						) invoice WHERE skuid='$sku_id') ";
 			break;
 		}
-		$sql.=" UNION (SELECT DATE_FORMAT(tbl_stockout_header.date,'%Y-%m-%d') AS dated,
+		$sql.=" UNION (SELECT null as siref,DATE_FORMAT(tbl_stockout_header.date,'%Y-%m-%d') AS dated,
 			tbl_stockout_items.item_desc prodname,
 			qty,unit,CONCAT('OUT') AS stat,concat(tbl_stockout_header.status,' REF:',stockin_refid,' ',tbl_stockout_header.remarks) remarks,divmul,concat(0) selling,cost,tbl_stockout_items.id,concat('tbl_stockout_items') as tblname
 			FROM tbl_stockout_items LEFT JOIN tbl_stockout_header ON tbl_stockout_items.stockin_refid=tbl_stockout_header.id WHERE skuid='$sku_id')
@@ -1029,6 +1034,7 @@ switch($_REQUEST['execute']){
 		$qry = mysql_query($sql);
 		$prod = $db->resultArray("a.sku_id,a.product_name","tbl_product_name a","where a.product_name !='' order by product_name asc");
 		?>
+		<?php /*
 		<fieldset>
 			<legend>Transfer Records To:</legend>
 			<div style="float:left;width:130px;margin-right:5px;">Product Name:</div>
@@ -1040,6 +1046,7 @@ switch($_REQUEST['execute']){
 			</select>
 			<input type="button" value="Transfer" onclick="transferProd()" style="width:150px;float:right;"/>
 		</fieldset>
+		*/ ?>
 		<div style="clear:both;height:5px;"></div>
 		<?
 		echo "<div style='width:100%;height:300px;overflow:auto;'>";
@@ -1065,6 +1072,11 @@ switch($_REQUEST['execute']){
 			}else{
 				$bal += $row['qty'];
 			}
+			if($row['tblname']=="tbl_sales_invoice"){
+				$tbl = "<a href='./reports/dynamic_invoicing_rtk.php?refid=".$row['siref']."&tbltype=sales_invoice' target='_blank'>View Invoice</a>";
+			}else{
+				$tbl = $row['tblname'];
+			}
 			echo "<tr>
 				<td style='$color'>".$row['dated']."</td>
 				<td style='$color;text-align:right;'>".$row['qty']."</td>
@@ -1075,7 +1087,8 @@ switch($_REQUEST['execute']){
 				<td style='$color'>".$row['remarks']."</td>
 				<td style='$color'>".number_format($row['selling'],2)."</td>
 				<td style='$color' ondblclick='changeCost(".$row['id'].",\"".$row['tblname']."\",\"".$sku_id."\")'>".number_format($row['cost'],2)."</td>
-				<td>".$row['tblname']."</td>
+				<td>".
+				$tbl."</td>
 			</tr>"; //$db->outputInvBal($db->invBal($sku_id,$row['dated']),$sku_id) $db->outputInvBal($db->invBal($sku_id,$row['dated']),$sku_id)
 		}
 		echo "</table>";
@@ -1943,7 +1956,7 @@ switch($_REQUEST['execute']){
 				if(!acctid){
 					alert("Please select customer first...");
 				}else{
-					clickDialog('dialogbox2',900,500,'custtransdetails&acctid='+acctid,'CustTrans Details');
+					clickDialog('dialogbox2',900,500,'custtransdetails&acctid='+acctid,'Customer Transaction Details');
 				}
 			}
 			function viewWorkOrders(){
@@ -1984,23 +1997,191 @@ switch($_REQUEST['execute']){
 		  </script>
 		<?
 	break;
-	case"adjustment":
+	case"payment_received":
+		if($_REQUEST['receipt']){
+			$rec=$db->resultArray("*","tbl_customers_trans","where receipt='{$_REQUEST['receipt']}'");
+			foreach($rec as $k=>$val){
+				if(strpos($val['details'],"Cheque:")!== false||strpos($val['details'],"Cash:")!== false){
+					$info=$val;
+				}
+				if(strpos($val['details'],"W/Holding 2306:")!== false){
+					$wholding2306=$val;
+				}
+				if(strpos($val['details'],"W/Holding:")!== false || strpos($val['details'],"W/Holding 2307:")!== false){
+					$wholding=$val;
+				}
+				if(strpos($val['details'],"Discount:")!== false){
+					$discount=$val;
+				}
+				if(strpos($val['details'],"Penalty:")!== false){
+					$penalty=$val;
+				}
+			}
+			$paid_invoices = $db->resultArray("*","tbl_sales_invoice_paid","where or_number='{$_REQUEST['receipt']}'");
+		}
+		$invoices = $db->resultArray("tbl_customers_trans.*,paid.total","tbl_customers_trans 
+			left join (select si_number,sum(amount_paid) total from tbl_sales_invoice_paid group by si_number) paid on tbl_customers_trans.receipt=paid.si_number",
+			"where cust_id='{$_REQUEST['acctid']}' and (transtype='sales_invoice' or transtype='Adjustment') and (or_ref='' or or_ref is null) and amount>0");
+		
 		?>
-		<div style="float:left;margin-right:5px;width:100px;">Details:</div>
-		<textarea name="adj_details" id="adj_details" style="float:left;width:215px;height:150px;"></textarea>
-		<div style="clear:both;height:5px;"></div>
-		<div style="float:left;margin-right:5px;width:100px;">Amount:</div>
-		<input type="text" name="adj_amount" id="adj_amount" style="float:left;width:215px;"/>
-		<div style="clear:both;height:5px;"></div>
-		<input type="button" value="Save" style="float:left;height:40px;width:180px;" onclick="save_adjustment()"/>
+		<style>
+		#invTbl tr td{
+			font-size:10px;
+		}
+		</style>
+		<div style="float:left;width:45%">
+			<input type="hidden" name="edit" id="edit" value="<?=$_REQUEST['receipt']?>"/>
+			<input type="hidden" name="refid" id="refid" value="<?=$info?$info['id']:""?>"/>
+			<div style="float:left;margin-right:5px;width:100px;">OR #:</div>
+			<input type="text" name="ornum" id="ornum" style="float:left;width:65%;" value="<?=$info?$info['receipt']:""?>"/>
+			<input type="button" value="Search OR" style="float:left;width:80px;margin-left:5px;" onclick="searchOR()"/>
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Date:</div>
+			<input type="text" name="xdate" id="xdate" style="float:left;width:95%;" autocomplete="off" value="<?=$info?date("Y-m-d",strtotime($info['date'])):""?>"/>
+			<!--div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Details:</div>
+			<textarea name="custpay_details" id="custpay_details" style="float:left;width:95%;height:150px;"></textarea-->
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Amount:</div>
+			<input type="text" name="custpay_amount" id="custpay_amount" style="float:left;width:95%;" value="<?=$info?$info['amount']:""?>"/>
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Collector:</div>
+			<select name="collector" id="collector" style="float:left;width:95%;">
+				<option value="">Select Collector</option>
+				<?php
+				$emp = $db->resultArray("concat(firstname,' ',lastname) name","tbl_employees","");
+				foreach($emp as $k => $v){
+					echo "<option value='{$v['name']}'>{$v['name']}</option>";
+				}
+				?>
+				
+			</select>
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;width:45%;">
+				<fieldset>
+					<legend>W/Holding 2306</legend>
+					<input type="text" name="wholding2306" placeholder="0.00 %" style="width:150px;"/>
+					<div style="clear:both;height:5px;"></div>
+					<input type="text" name="wholding2306_amount" placeholder="W/Holding Amount" style="width:150px;" value="<?=$wholding2306?$wholding2306['amount']:""?>"/>
+				</fieldset>
+				<div style="clear:both;height:5px;"></div>
+				<fieldset>
+					<legend>W/Holding 2307</legend>
+					<input type="text" name="wholding" placeholder="0.00 %" style="width:150px;"/>
+					<div style="clear:both;height:5px;"></div>
+					<input type="text" name="wholding_amount" placeholder="W/Holding Amount" style="width:150px;" value="<?=$wholding?$wholding['amount']:""?>"/>
+				</fieldset>
+				<div style="clear:both;height:5px;"></div>
+				<fieldset>
+					<legend>Discount</legend>
+					<input type="text" name="discount_percent" placeholder="0.00 %" style="width:150px;"/>
+					<div style="clear:both;height:5px;"></div>
+					<input type="text" name="discount_amount" placeholder="Discount Amount" style="width:150px;" value="<?=$discount?$discount['amount']:""?>"/>
+				</fieldset>
+			</div>
+			<div style="float:left;width:50%;">
+				<fieldset>
+					<legend>Paid In</legend>
+					<div style="float:left;width:40%;"><input checked="checked" type="radio" name="paidstatus" value="Full" /> Full </div>
+					<div style="float:left;width:40%;"><input type="radio" name="paidstatus" value="Partial" /> Partial </div>
+				</fieldset>
+				<fieldset>
+					<legend>Paid In</legend>
+					<div style="float:left;width:40%;"><input checked="checked" type="radio" name="paidtype" value="Cash" /> Cash </div>
+					<div style="float:left;width:41%;"><input type="radio" name="paidtype" value="Cheque" /> Cheque </div>
+					<div style="clear:both;height:5px;"></div>
+					<input type="text" placeholder="Cheque Details" name="cheque_details" style="width:176px;"/>
+				</fieldset>
+				<div style="clear:both;height:5px;"></div>
+				<fieldset>
+					<legend>Penalty</legend>
+					<input type="text" name="penalty_percent" placeholder="0.00 %" style="width:150px;"/>
+					<div style="clear:both;height:5px;"></div>
+					<input type="text" name="penalty_amount" placeholder="Penalty Amount" style="width:150px;" value="<?=$discount?$discount['amount']:""?>"/>
+				</fieldset>
+			</div>
+			
+			
+			<div style="clear:both;height:5px;"></div>
+			<input type="button" value="Save" style="float:left;height:40px;width:180px;" onclick="savecustpay()"/>
+		</div>
+		<div style="float:left;width:50%;">
+			<table class="navigateableMain" id="invTbl" cellspacing="0" cellpadding="0" width="100%">
+				<thead>
+					<tr>
+						<th style="border:none;" colspan="5">Total Checked</th>
+						<th style="border:none;" colspan="2" class="totalChecked"></th>
+					</tr>
+					<tr>
+						<th style="border:none;">&nbsp;</th>
+						<th style="border:none;">Inv #</th>
+						<th style="border:none;">Date</th>
+						<th style="border:none;">Details</th>
+						<th style="border:none;">Amount</th>
+						<th style="border:none;">Paid Amount</th>
+						<th style="border:none;">Balance</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><input type="checkbox" value="Unapplied" class="myCheckbox"></td>
+						<td>Unapplied</td>
+						<td>-</td>
+						<td>-</td>
+						<td style="text-align:right;"><?=number_format(0,2)?></td>
+						<td><input type="text" name="paidamt[]" style="width:100%;"/></td>
+					</tr>
+					<?php foreach($invoices as $key => $val){ ?>
+						<tr>
+							<td><input type="checkbox" value="<?=$val['receipt']?>" class="myCheckbox"></td>
+							<td><?=$val['receipt']?></td>
+							<td><?=date('Y-m-d',strtotime($val['date']))?></td>
+							<td><?=$val['details']?></td>
+							<td style="text-align:right;"><?=number_format($val['amount'],2)?></td>
+							<td><input type="text" name="paidamt[]" style="width:100%;"/></td>
+							<td><?=number_format($val['amount']-$val['total'],2)?></td>
+						</tr>
+					<?php } ?>
+				</tbody>
+			</table>
+		</div>
 		<script>
-			function save_adjustment(){
+			$('#xdate').datepicker({
+				changeMonth: true,
+				changeYear: true,
+				inline: true,
+				dateFormat:"yy-mm-dd"
+			});
+			function getCheckVal(){
+				var xrec = [];
+				$('.myCheckbox:checked').each(function(index,elem){
+					var si = $(this).val();
+					var amtpaid = $(this).closest('tr').find("input[name='paidamt[]']").val();
+					xrec.push({'si':si,'amtpaid':amtpaid});
+				});
+				return xrec;
+			}
+			function savecustpay(){
+				var edit = $("#edit").val();
+				var ornum = $("#ornum").val();
 				var acctid = '<?=$_REQUEST['acctid']?>';
-				var adj_details = $("#adj_details").val();
-				var adj_amount = $("#adj_amount").val();
+				var custpay_details = $("#custpay_details").val();
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var ar = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var date = $("#xdate").val();
+				var checked = $('.myCheckbox:checked').map(function() {return this.value;}).get().join(',');
+				var collector=$("#collector").val();
+				var paidtype = $("input[name='paidtype']:checked").val();
+				var paidstatus = $("input[name='paidstatus']:checked").val();
+				var wholding_amount = $("input[name='wholding_amount']").val().replace(/,/g, "");
+				var wholding2306_amount = $("input[name='wholding2306_amount']").val().replace(/,/g, "");
+				var discount_amount = $("input[name='discount_amount']").val().replace(/,/g, "");
+				var penalty_amount = $("input[name='penalty_amount']").val().replace(/,/g, "");
+				var xrec = getCheckVal();//JSON.stringify()
+				
 				$.ajax({
-					url: './content/pos_ajax.php?execute=save_adj',
-					data:{adj_details:adj_details,adj_amount:adj_amount,acctid:acctid},
+					url: './content/pos_ajax.php?execute=savecustpay',
+					data:{ar:ar,wholding2306_amount:wholding2306_amount,edit:edit,xrec:xrec,penalty_amount:penalty_amount,discount_amount:discount_amount,wholding_amount:wholding_amount,paidstatus:paidstatus,paidtype:paidtype,collector:collector,ornum:ornum,date:date,custpay_details:custpay_details,custpay_amount:custpay_amount,acctid:acctid,receipts:checked},
 					type:"POST",
 					success:function(data){
 						if(data=="success"){
@@ -2011,37 +2192,517 @@ switch($_REQUEST['execute']){
 					}
 				});
 			}
+			function searchOR(){
+				var refid = $("#ornum").val();
+				var acctid = $('#acctid').html();
+				if(!acctid){
+					alert("Please select customer first...");
+				}else{
+					clickDialog('dialogbox2',900,500,'payment_received&acctid='+acctid+"&receipt="+refid,'Customer Payment Received');
+				}
+			}
+			$("input[name='wholding']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var wholding = (amt/1.12)*$(this).val();
+				$("input[name='wholding_amount']").val(new Number(wholding).formatMoney(2));
+				$("#custpay_amount").val(new Number(custpay_amount - wholding).formatMoney(2));
+				
+			});
+			$("input[name='wholding_amount']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var wholding = $(this).val();
+				$("input[name='wholding']").val(new Number(wholding/amt).formatMoney(2));
+				$("#custpay_amount").val(new Number(custpay_amount - wholding).formatMoney(2));
+				
+			});
+			$("input[name='wholding2306']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var wholding = (amt/1.12)*$(this).val();
+				$("input[name='wholding2306_amount']").val(new Number(wholding).formatMoney(2));
+				$("#custpay_amount").val(new Number(custpay_amount - wholding).formatMoney(2));
+				
+			});
+			$("input[name='wholding2306_amount']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var wholding = $(this).val();
+				$("input[name='wholding2306']").val(new Number(wholding/amt).formatMoney(2));
+				$("#custpay_amount").val(new Number(custpay_amount - wholding).formatMoney(2));
+				
+			});
+			
+			//--------------------
+			$("input[name='discount_percent']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var disc_amt=amt*$(this).val();
+				$("input[name='discount_amount']").val(disc_amt);
+				$("#custpay_amount").val(new Number(custpay_amount - disc_amt).formatMoney(2));
+			});
+			$("input[name='discount_amount']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var disc_amt=$(this).val();
+				$("input[name='discount_amount']").val(disc_amt);
+				$("#custpay_amount").val(new Number(custpay_amount - disc_amt).formatMoney(2));
+			});
+			
+			$("input[name='penalty_percent']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var penalty_amt = amt*$(this).val();
+				$("input[name='penalty_amount']").val(penalty_amt);
+				$("#custpay_amount").val(new Number(custpay_amount + penalty_amt).formatMoney(2));
+			});
+			
+			$("input[name='penalty_amount']").change(function(){
+				var custpay_amount = $("#custpay_amount").val().replace(/,/g, "");
+				var amt = new Number($(".totalChecked").html().replace(/,/g, ""));
+				var res = new Number(custpay_amount) + new Number($(this).val());
+				$("#custpay_amount").val(new Number(res).formatMoney(2));
+			});
+			$("input[name='paidamt[]").change(function(){
+				$(".totalChecked").html(new Number(getTotal()).formatMoney(2));
+			});
+			$(".myCheckbox").change(function(){
+				$(".totalChecked").html(new Number(getTotal()).formatMoney(2));
+			});
+			function getTotal(){
+				var total = 0;
+			   $('.myCheckbox:checked').each(function(){
+					total+=parseFloat($(this).closest("tr").find('td:eq(5) input').val().replace(/,/g, ""));
+			   });
+			   $("#custpay_amount").val(new Number(total).formatMoney(2));
+			   return total;
+			}
+		</script>
+		<?
+	break;
+	case"savecustpay":
+		if($_REQUEST['edit']){
+			$del="delete from tbl_customers_trans where receipt='{$_REQUEST['ornum']}' and cust_id='{$_REQUEST['acctid']}'";
+			//$del2="delete from tbl_sales_invoice_paid where or_number={$_REQUEST['ornum']}";
+			$del_qry1 = mysql_query($del);
+			//$del_qry2 = mysql_query($del2);
+			if(!$del_qry1){
+				echo mysql_error();
+			}
+			// if(!$del_qry2){
+				// echo mysql_error();
+			// }
+		}
+		$data = array(
+				'date'=>$_REQUEST['date'],
+				'cust_id'=>$_REQUEST['acctid'],
+				'receipt'=>$_REQUEST['ornum'],
+				'counter'=>$_SESSION['counter_num'],
+				'reading'=>$_SESSION['readingnum'],
+				'transtype'=>'Payment',
+				'details'=>$_REQUEST['paidtype'].":".$_REQUEST['custpay_details']." Ref # ".$_REQUEST['receipts'],
+				'amount'=>str_replace(",","",number_format($_POST['custpay_amount'],2)));
+		$sql = "insert into tbl_customers_trans (`".implode("`,`",array_keys($data))."`) values ('".implode("','",$data)."')";
+		$stat = mysql_query($sql);
+		$total_amt = str_replace(",","",$_POST['custpay_amount']);
+		if($_REQUEST['wholding2306_amount']){
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'6431','account_desc'=>'FINAL WITH HOLDING VAT','cr'=>'','dr'=>$_POST['wholding2306_amount'],'center'=>"$cost_center",'type'=>'GJ');
+			$stat = $db->saveCustTrans(array(
+					'date'=>$_REQUEST['date'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>$_REQUEST['ornum'],
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Payment',
+					'details'=>"W/Holding 2306: Ref #".$_REQUEST['receipts'],
+					'amount'=>str_replace(",","",number_format(($_POST['wholding2306_amount']),2))));
+		}
+		if($_REQUEST['wholding_amount']){
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'1228','account_desc'=>'CREDITABLE TAX WITHHELD','cr'=>'','dr'=>$_POST['wholding_amount'],'center'=>"$cost_center",'type'=>'GJ');
+			$stat = $db->saveCustTrans(array(
+					'date'=>$_REQUEST['date'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>$_REQUEST['ornum'],
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Payment',
+					'details'=>"W/Holding 2307: Ref #".$_REQUEST['receipts'],
+					'amount'=>str_replace(",","",number_format(($_POST['wholding_amount']),2))));
+		}
+		if($_REQUEST['discount_amount']){
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'5005','account_desc'=>'PROMPT PAYMENT DISCOUNT','cr'=>'','dr'=>$_POST['discount_amount'],'center'=>"$cost_center",'type'=>'GJ');
+			$stat = $db->saveCustTrans(array(
+					'date'=>$_REQUEST['date'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>$_REQUEST['ornum'],
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Payment',
+					'details'=>"Discount: Ref #".$_REQUEST['receipts'],
+					'amount'=>str_replace(",","",number_format(($_POST['discount_amount']),2))));
+		}
+		if($_REQUEST['penalty_amount']){
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'4204','account_desc'=>'OTHER INCOME - OTHERS','cr'=>$_POST['penalty_amount'],'dr'=>'','center'=>"$cost_center",'type'=>'GJ');
+			$stat = $db->saveCustTrans(array(
+					'date'=>$_REQUEST['date'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>$_REQUEST['ornum'],
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Payment',
+					'details'=>"Penalty: Ref #".$_REQUEST['receipts'],
+					'amount'=>str_replace(",","",number_format(($_POST['penalty_amount']),2))));
+			//$total_amt = (double)$total_amt + (double)str_replace(",","",number_format(($_POST['penalty_amount']),2));
+		}
+		if($stat){
+			
+			if($_REQUEST['paidstatus']=="Full"){
+				$receipts = explode(",",$_REQUEST['receipts']);
+				$sql="update tbl_customers_trans set or_ref='{$_REQUEST['ornum']}' where receipt in ('".implode("','",$receipts)."')";
+				$qry=mysql_query($sql);
+			}
+			
+			$header="insert into tbl_sales_invoice_paid (si_number,or_number,amount_paid) values ";
+			$flag=false;
+			foreach($_POST['xrec'] as $k => $v){
+				if($flag)$items.=",";
+				$items.="('{$v['si']}','{$_REQUEST['ornum']}','{$v['amtpaid']}')";
+				$flag=true;
+			}
+			$inv = mysql_query($header.$items." on duplicate key update amount_paid=values(amount_paid)");
+			if(!$inv){
+				echo mysql_error();
+			}
+			//Auto SJ
+			$glref=$con->getNextJournalID('GJ');
+			
+			$sql="insert into tbl_vouchering (id,center,date,type,remarks,total,preparedby,`status`,`reference`) values 
+				('".$glref."','{$_SESSION['connect']}','".date('Y-m-d')."','GJ', 
+				'TO RECORD PAYMENT','".$total_amt."', 
+				'".$_SESSION['xid']."','ForApproval','CR#{$_REQUEST['ornum']}') 
+				on duplicate key update `date`=values(`date`),center=values(center),type=values(type),remarks=values(remarks),total=values(total)";
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'7502','account_desc'=>'ACCOUNTS RECEIVABLE-TRADE','cr'=>str_replace(",","",number_format(($_POST['ar']),2)),'dr'=>'','center'=>"",'ar_refid'=>"{$_REQUEST['acctid']}",'type'=>'GJ');
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'1002','account_desc'=>'CASH IN BANK','cr'=>'','dr'=>$total_amt,'center'=>"$cost_center",'type'=>'GJ');
+			$glid=$con->insertSJDiffApproach($glref,$sql,date('Y-m-d'),$entry,'GJ');
+			//Auto SJ
+			echo "success";
+		}else{
+			echo $stat;
+		}
+	break;
+	case"adjustment":
+		$info=$db->getWHERE("*","tbl_customers_trans","where id='{$_REQUEST['refid']}'");
+		if($_REQUEST['type']=="credit_memo"){
+			$invoices = $db->resultArray("*","tbl_customers_trans","where cust_id='{$_REQUEST['acctid']}' and (transtype='sales_invoice' or transtype='Adjustment') and (or_ref='' or or_ref is null) and amount>0");
+		}
+		?>
+		<div style="float:left;width:40%;">
+			<div style="float:left;margin-right:5px;width:100px;">REF #:</div>
+			<input value="<?=$info['refnum']?>" type="text" name="refnum" id="refnum" style="float:left;width:215px;"/>
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Date:</div>
+			<input autocomplete=off value="<?=$info?date("Y-m-d",$info['date']):""?>" type="text" name="xdate" id="xdate" style="float:left;width:215px;"/>
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Reason:</div>
+			<textarea name="adj_details" id="adj_details" style="float:left;width:215px;height:150px;"><?=$info?$info['details']:""?></textarea>
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Amount:</div>
+			<input value="<?=$info?number_format($info['amount'],2):""?>" type="text" name="adj_amount" id="adj_amount" style="float:left;width:215px;"/>
+			<div style="clear:both;height:5px;"></div>
+			<div style="float:left;margin-right:5px;width:100px;">Invoice Reference:</div>
+			<input value="<?=$info?$info['or_ref']:""?>" type="text" name="inv_ref" id="inv_ref" style="float:left;width:215px;"/>
+			<div style="clear:both;height:5px;"></div>
+			<input type="button" value="Save" style="float:left;height:40px;width:180px;" onclick="save_adjustment()"/>
+		</div>
+		<div style="width:60%;float:left;">
+			<table class="navigateableMain" id="items_tbl" cellspacing="0" cellpadding="0" width="100%">
+				<thead>
+					<tr>
+						<th style="border:none;"><input type="button" value="+" id="items" style="width:20px;height:25px;"/></th>
+						<th style="border:none;width:250px;">Remarks</th>
+						<th style="border:none;">QTY</th>
+						<th style="border:none;">UNIT</th>
+						<th style="border:none;">PRICE</th>
+						<th style="border:none;">Amount</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+			<div style="clear:both;height:5px;"></div>
+			<?php if($_REQUEST['type']=="credit_memo"){ ?>
+			<table class="navigateableMain" id="invTbl" cellspacing="0" cellpadding="0" width="100%">
+				<thead>
+					<tr>
+						<th style="border:none;" colspan="4">Total Checked</th>
+						<th style="border:none;" colspan="2" class="totalChecked"></th>
+					</tr>
+					<tr>
+						<th style="border:none;">&nbsp;</th>
+						<th style="border:none;">Inv #</th>
+						<th style="border:none;">Date</th>
+						<th style="border:none;">Details</th>
+						<th style="border:none;">Amount</th>
+						<th style="border:none;">Paid Amount</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><input type="checkbox" value="Unapplied" class="myCheckbox"></td>
+						<td>Unapplied</td>
+						<td>-</td>
+						<td>-</td>
+						<td style="text-align:right;"><?=number_format(0,2)?></td>
+						<td><input type="text" name="paidamt[]" style="width:100%;"/></td>
+					</tr>
+					<?php foreach($invoices as $key => $val){ ?>
+						<tr>
+							<td><input type="checkbox" value="<?=$val['receipt']?>" class="myCheckbox"></td>
+							<td><?=$val['receipt']?></td>
+							<td><?=date('Y-m-d',strtotime($val['date']))?></td>
+							<td><?=$val['details']?></td>
+							<td style="text-align:right;"><?=number_format($val['amount'],2)?></td>
+							<td><input type="text" name="paidamt[]" style="width:100%;"/></td>
+						</tr>
+					<?php } ?>
+				</tbody>
+			</table>
+			<?php } ?>
+		</div>
+		
+		<script>
+			$(document).ready(function() {
+				$('#xdate').datepicker({
+					inline: true,
+					changeMonth: true,
+					changeYear: true,
+					dateFormat:"yy-mm-dd"
+				});
+			});
+			function sumName(name){
+				var sum = 0;
+				// iterate through each td based on class and add the values
+				$(name).each(function() {
+					//var value = $(this).find("'td:eq(1)'").children().val();
+					var value = $(this).val().replace(/,/g, "");
+					// add only if the value is number
+					if(!isNaN(value) && value.length != 0) {
+						sum += parseFloat(value);
+					}
+				});
+				return sum;
+			}
+			$("input[value='+']").on('click',function(){
+				var id = $(this).attr('id');
+				var num =$("#"+id+"_tbl tbody tr").length;
+				switch(id){
+					case'items':
+						var txt = '<tr>\
+								<td><input type="checkbox" ></td>\
+								<td><input type="text" name="items['+num+'][details]" value="" style="width:100%;"/></td>\
+								<td><input type="text" name="items['+num+'][qty]" class="qty" value="" style="width:100%;"/></td>\
+								<td><input type="text" name="items['+num+'][unit]" value="" style="width:100%;"/></td>\
+								<td><input type="text" name="items['+num+'][price]" class="price" value="" style="width:100%;"/></td>\
+								<td><input type="text" name="items['+num+'][amount]" class="adjamt" value="" style="width:100%;"/></td>\
+							</tr>';
+					break;
+				}
+				$("#"+id+"_tbl tbody").prepend(txt);
+				setChanges();
+			});
+			function setChanges(){
+				$(".adjamt, .qty, .price").on("change paste keyup",function(){
+					var tr = $(this).closest("tr");
+					var qty = strtodouble(tr.find(".qty").val());
+					var price = strtodouble(tr.find(".price").val());
+					var total = (qty*price);
+					tr.find(".adjamt").val(strtocurrency(total));
+					
+					var subtotal = sumName(".adjamt");
+					$("#adj_amount").val(subtotal);
+				});
+			}
+			function tblContent(tblId){
+				var TableData = new Array();
+					
+				$(tblId+' tr').each(function(row, tr){
+					TableData[row]={
+						"details" :$(tr).find('td:eq(1) input').val()
+						, "amount" : $(tr).find('td:eq(2) input').val()
+					}
+				}); 
+				TableData.shift();  // first row is the table header - so remove
+				return TableData;
+			}
+			function save_adjustment(){
+				var refnum = $("#refnum").val();
+				var acctid = '<?=$_REQUEST['acctid']?>';
+				var adj_details = $("#adj_details").val();
+				var adj_amount = $("#adj_amount").val().replace(/,/g, "");
+				var totalCheck = new Number(getTotal());
+				var xdate = $("#xdate").val();
+				var checked = $('.myCheckbox:checked').map(function() {return this.value;}).get().join(',');
+				var pTableData =JSON.stringify(tblContent("#items_tbl"));
+				if(adj_amount<totalCheck){
+					alert("Amount not matched in the selected invoice...");
+				}else{
+					$.ajax({
+						url: './content/pos_ajax.php?execute=save_adj&type=<?=$_REQUEST['type']?>',
+						data:{refnum:refnum,receipts:checked,xdate:xdate,adj_details:adj_details,adj_amount:adj_amount,acctid:acctid,pTableData:pTableData},
+						type:"POST",
+						success:function(data){
+							res = data.split(",");
+							if(res[0]=="success"){
+								viewCMDM(res[1]);
+								//viewTrans();
+								$('#dialogbox2').dialog('close');
+								
+							}else{
+								alert(data);
+							}
+						}
+					});
+				}
+			}
+			$("input[name='paidamt[]").change(function(){
+				$(".totalChecked").html(new Number(getTotal()).formatMoney(2));
+			});
+			function viewCMDM(id){
+				if (window.showModalDialog) {
+					window.showModalDialog('./reports/credit_memo.php?refid='+id,"Credit Memo","dialogWidth:700px;dialogHeight:550px");
+				} else {
+					window.open('./reports/credit_memo.php?refid='+id,"Credit Memo",'height=550,width=700,toolbar=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,modal=yes,location=yes');
+				}
+			}
+			$(".myCheckbox").change(function(){
+				$(".totalChecked").html(new Number(getTotal()).formatMoney(2));
+			});
+			function getTotal(){
+				var total = 0;
+			   $('.myCheckbox:checked').each(function(){
+					total+=parseFloat($(this).closest("tr").find('td:eq(5) input').val().replace(/,/g, ""));
+			   });
+			   $("#adj_amount").val(new Number(total).formatMoney(2));
+			   return total;
+			}
 		</script>
 		<?
 	break;
 	case"save_adj":
-		$stat = $db->saveCustTrans(array('cust_id'=>$_REQUEST['acctid'],
-				'receipt'=>'','counter'=>$_SESSION['counter_num'],'reading'=>$_SESSION['readingnum'],
-				'transtype'=>'Adjustment','details'=>"Adj:".$_REQUEST['adj_details'],
-				'amount'=>str_replace(",","",number_format($_POST['adj_amount'],2))));
+		if($_REQUEST['type']=="credit_memo"){
+			$refdesc="CM";
+			if($_REQUEST['edit']){
+				$stat = $db->editCustTrans(array(
+					'date'=>$_REQUEST['xdate'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>'',
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Credit Memo',
+					'details'=>"CR:".$_REQUEST['adj_details']." Ref # ".$_REQUEST['receipts'],
+					'more_details'=>$_REQUEST['pTableData'],
+					'amount'=>str_replace(",","",number_format($_POST['adj_amount'],2))));
+
+			}else{
+				$stat = $db->saveCustTrans(array(
+					'date'=>$_REQUEST['xdate'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>'',
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Credit Memo',
+					'details'=>"CR:".$_REQUEST['adj_details']." Ref # ".$_REQUEST['receipts'],
+					'more_details'=>$_REQUEST['pTableData'],
+					'amount'=>str_replace(",","",number_format($_POST['adj_amount'],2))));
+			}
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'7502','account_desc'=>'ACCOUNTS RECEIVABLE-TRADE','cr'=>str_replace(",","",$_POST['adj_amount']),'dr'=>'','center'=>"",'ar_refid'=>"{$_REQUEST['acctid']}",'type'=>'GJ');
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'4004','account_desc'=>'SALES RETURNS','cr'=>'','dr'=>str_replace(",","",$_POST['adj_amount']),'center'=>"$cost_center",'type'=>'GJ');
+		}else{
+			$refdesc="DM";
+			if($_REQUEST['edit']){
+				$stat = $db->editCustTrans(array(
+					'date'=>$_REQUEST['xdate'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>'',
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Adjustment',
+					'details'=>"DR:".$_REQUEST['adj_details'],
+					'more_details'=>$_REQUEST['pTableData'],
+					'amount'=>str_replace(",","",number_format($_POST['adj_amount'],2))));
+			}else{
+				$stat = $db->saveCustTrans(array(
+					'date'=>$_REQUEST['xdate'],
+					'cust_id'=>$_REQUEST['acctid'],
+					'receipt'=>'',
+					'counter'=>$_SESSION['counter_num'],
+					'reading'=>$_SESSION['readingnum'],
+					'transtype'=>'Adjustment',
+					'details'=>"DR:".$_REQUEST['adj_details'],
+					'more_details'=>$_REQUEST['pTableData'],
+					'amount'=>str_replace(",","",number_format($_POST['adj_amount'],2))));
+			}
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'7502','account_desc'=>'ACCOUNTS RECEIVABLE-TRADE','cr'=>'','dr'=>str_replace(",","",$_POST['adj_amount']),'center'=>"",'ar_refid'=>"{$_REQUEST['acctid']}",'type'=>'GJ');
+			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'4000','account_desc'=>'SALES','cr'=>str_replace(",","",$_POST['adj_amount']),'dr'=>'','center'=>"",'type'=>'GJ');
+		}
+		$refid = mysql_insert_id();
 		if($stat){
-			echo "success";
+			// if($_REQUEST['type']=="credit_memo"){
+				// $receipts = explode(",",$_REQUEST['receipts']);
+				// $sql="update tbl_customers_trans set or_ref='{$refid}' where receipt in ('".implode("','",$receipts)."')";
+				// $qry=mysql_query($sql);
+			// }
+			
+			//Auto SJ
+			$glref=$con->getNextJournalID('GJ');
+			$total_amt = str_replace(",","",$_POST['adj_amount']);
+			$sql="insert into tbl_vouchering (id,center,date,type,remarks,total,preparedby,`status`,`reference`) values 
+				('".$glref."','{$_SESSION['connect']}','".date('Y-m-d')."','GJ', 
+				'TO RECORD {$_REQUEST['type']}','".$total_amt."', 
+		'".$_SESSION['xid']."','ForApproval','{$refdesc}#{$_REQUEST['refnum']}') 
+				on duplicate key update `date`=values(`date`),center=values(center),type=values(type),remarks=values(remarks),total=values(total)";
+			
+			$glid=$con->insertSJDiffApproach($glref,$sql,date('Y-m-d'),$entry,'GJ');
+			//Auto SJ
+			
+			echo "success,$refid";
 		}else{
 			echo $stat;
 		}
 	break;
 	case"credit_memo":
 		?>
+		<div style="float:left;margin-right:5px;width:100px;">Date:</div>
+		<input type="text" name="xdate" id="xdate" style="float:left;width:215px;"/>
+		<div style="clear:both;height:5px;"></div>
 		<div style="float:left;margin-right:5px;width:100px;">Details:</div>
 		<textarea name="cm_details" id="cm_details" style="float:left;width:215px;height:150px;"></textarea>
 		<div style="clear:both;height:5px;"></div>
 		<div style="float:left;margin-right:5px;width:100px;">Amount:</div>
 		<input type="text" name="cm_amount" id="cm_amount" style="float:left;width:215px;"/>
 		<div style="clear:both;height:5px;"></div>
+		<div style="float:left;margin-right:5px;width:100px;">Invoice Reference:</div>
+		<input type="text" name="inv_ref" id="inv_ref" style="float:left;width:215px;"/>
+		<div style="clear:both;height:5px;"></div>
 		<input type="button" value="Save" style="float:left;height:40px;width:180px;" onclick="savecredit_memo()"/>
 		<script>
+			$(document).ready(function() {
+				$('#xdate').datepicker({
+					inline: true,
+					changeMonth: true,
+					changeYear: true,
+					dateFormat:"yy-mm-dd"
+				});
+			});
 			function savecredit_memo(){
 				var acctid = '<?=$_REQUEST['acctid']?>';
 				var cm_details = $("#cm_details").val();
 				var cm_amount = $("#cm_amount").val();
+				var xdate = $("#xdate").val();
+				var inv_ref = $("#inv_ref").val();
 				$.ajax({
 					url: './content/pos_ajax.php?execute=savecm',
-					data:{cm_details:cm_details,cm_amount:cm_amount,acctid:acctid},
+					data:{xdate:xdate,cm_details:cm_details,cm_amount:cm_amount,acctid:acctid,inv_ref:inv_ref},
 					type:"POST",
 					success:function(data){
 						res = data.split(",");
@@ -2065,138 +2726,18 @@ switch($_REQUEST['execute']){
 		<?
 	break;
 	case"savecm":
-		$stat = $db->saveCustTrans(array('cust_id'=>$_REQUEST['acctid'],
-				'receipt'=>'','counter'=>$_SESSION['counter_num'],'reading'=>$_SESSION['readingnum'],
-				'transtype'=>'Credit Memo','details'=>"CM:".$_REQUEST['cm_details'],
+		$stat = $db->saveCustTrans(array(
+				'date'=>$_REQUEST['xdate'],
+				'cust_id'=>$_REQUEST['acctid'],
+				'receipt'=>'',
+				'counter'=>$_SESSION['counter_num'],
+				'reading'=>$_SESSION['readingnum'],
+				'transtype'=>'Credit Memo',
+				'details'=>"CR:".$_REQUEST['cm_details'],
 				'amount'=>str_replace(",","",number_format($_POST['cm_amount'],2))));
 		$refid = mysql_insert_id();
 		if($stat){
 			echo "success,$refid";
-		}else{
-			echo $stat;
-		}
-	break;
-	case"payment_received":
-		$invoices = $db->resultArray("*","tbl_customers_trans","where cust_id='{$_REQUEST['acctid']}' and transtype='sales_invoice' and (or_ref='' or or_ref is null)");
-		?>
-		<div style="float:left;width:45%">
-			<div style="float:left;margin-right:5px;width:100px;">OR #:</div>
-			<input type="text" name="ornum" id="ornum" style="float:left;width:95%;"/>
-			<div style="clear:both;height:5px;"></div>
-			<div style="float:left;margin-right:5px;width:100px;">Date:</div>
-			<input type="text" name="xdate" id="xdate" style="float:left;width:95%;"/>
-			<div style="clear:both;height:5px;"></div>
-			<div style="float:left;margin-right:5px;width:100px;">Details:</div>
-			<textarea name="custpay_details" id="custpay_details" style="float:left;width:95%;height:150px;"></textarea>
-			<div style="clear:both;height:5px;"></div>
-			<div style="float:left;margin-right:5px;width:100px;">Amount:</div>
-			<input type="text" name="custpay_amount" id="custpay_amount" style="float:left;width:95%;"/>
-			<div style="clear:both;height:5px;"></div>
-			<div style="float:left;margin-right:5px;width:100px;">Collector:</div>
-			<input type="text" name="collector" id="collector" style="float:left;width:95%;"/>
-			<div style="clear:both;height:5px;"></div>
-			<fieldset>
-				<legend>Paid In</legend>
-				<div style="float:left;width:20%;"><input checked="checked" type="radio" name="paidtype" value="Cash" /> Cash </div>
-				<div style="float:left;width:20%;"><input type="radio" name="paidtype" value="Cheque" /> Cheque </div>
-			</fieldset>
-			<div style="clear:both;height:5px;"></div>
-			<input type="button" value="Save" style="float:left;height:40px;width:180px;" onclick="savecustpay()"/>
-		</div>
-		<div style="float:right;width:45%;">
-			<table class="navigateableMain" id="invTbl" cellspacing="0" cellpadding="0" width="100%">
-				<thead>
-					<tr>
-						<th style="border:none;" colspan="4">Total Checked</th>
-						<th style="border:none;" class="totalChecked"></th>
-					</tr>
-					<tr>
-						<th style="border:none;">&nbsp;</th>
-						<th style="border:none;">Inv #</th>
-						<th style="border:none;">Date</th>
-						<th style="border:none;">Details</th>
-						<th style="border:none;">Amount</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach($invoices as $key => $val){ ?>
-						<tr>
-							<td><input type="checkbox" value="<?=$val['receipt']?>" class="myCheckbox"></td>
-							<td><?=$val['receipt']?></td>
-							<td><?=date('Y-m-d',strtotime($val['date']))?></td>
-							<td><?=$val['details']?></td>
-							<td style="text-align:right;"><?=number_format($val['amount'],2)?></td>
-						</tr>
-					<?php } ?>
-				</tbody>
-			</table>
-		</div>
-		<script>
-			$('#xdate').datepicker({
-				changeMonth: true,
-				changeYear: true,
-				inline: true,
-				dateFormat:"yy-mm-dd"
-			});
-			function savecustpay(){
-				var ornum = $("#ornum").val();
-				var acctid = '<?=$_REQUEST['acctid']?>';
-				var custpay_details = $("#custpay_details").val();
-				var custpay_amount = $("#custpay_amount").val();
-				var date = $("#xdate").val();
-				var checked = $('.myCheckbox:checked').map(function() {return this.value;}).get().join(',');
-				var collector=$("#collector").val();
-				var paidtype = $("input[name='paidtype']:checked").val();
-				$.ajax({
-					url: './content/pos_ajax.php?execute=savecustpay',
-					data:{paidtype:paidtype,collector:collector,ornum:ornum,date:date,custpay_details:custpay_details,custpay_amount:custpay_amount,acctid:acctid,receipts:checked},
-					type:"POST",
-					success:function(data){
-						if(data=="success"){
-							viewTrans();
-						}else{
-							alert(data);
-						}
-					}
-				});
-			}
-			$(".myCheckbox").change(function(){
-				$(".totalChecked").html(new Number(getTotal()).formatMoney(2));
-			});
-			function getTotal(){
-				var total = 0;
-			   $('.myCheckbox:checked').each(function(){
-					total+=parseFloat($(this).closest("tr").find('td:eq(4)').text().replace(/,/g, ""));
-			   });
-			   return total;
-			}
-		</script>
-		<?
-	break;
-	case"savecustpay":
-		$data = array('cust_id'=>$_REQUEST['acctid'],
-				'receipt'=>$_REQUEST['ornum'],'counter'=>$_SESSION['counter_num'],'reading'=>$_SESSION['readingnum'],
-				'transtype'=>'Payment','details'=>$_REQUEST['paidtype'].":".$_REQUEST['custpay_details']." Ref # ".$_REQUEST['receipts'],
-				'amount'=>str_replace(",","",number_format($_POST['custpay_amount'],2)));
-		$sql = "insert into tbl_customers_trans (`".implode("`,`",array_keys($data))."`) values ('".implode("','",$data)."')";
-		$stat = mysql_query($sql);
-		if($stat){
-			$receipts = explode(",",$_REQUEST['receipts']);
-			$sql="update tbl_customers_trans set or_ref='{$_REQUEST['ornum']}' where receipt in ('".implode("','",$receipts)."')";
-			$qry=mysql_query($sql);
-			//Auto SJ
-			$glref=$con->getNextJournalID('GJ');
-			$total_amt = str_replace(",","",$_POST['custpay_amount']);
-			$sql="insert into tbl_vouchering (id,center,date,type,remarks,total,preparedby,`status`) values 
-				('".$glref."','{$_SESSION['connect']}','".date('Y-m-d')."','GJ', 
-				'TO RECORD PAYMENT','".$total_amt."', 
-				'".$_SESSION['xid']."','ForApproval') 
-				on duplicate key update `date`=values(`date`),center=values(center),type=values(type),remarks=values(remarks),total=values(total)";
-			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'7502','account_desc'=>'ACCOUNTS RECEIVABLE-TRADE','cr'=>$total_amt,'dr'=>'','center'=>"",'ar_refid'=>"{$_REQUEST['acctid']}",'type'=>'GJ');
-			$entry[]=array('fiscal_year'=>date('Y'),'account_code'=>'1002','account_desc'=>'CASH IN BANK','cr'=>'','dr'=>$total_amt,'center'=>"$cost_center",'type'=>'GJ');
-			$glid=$con->insertSJDiffApproach($glref,$sql,date('Y-m-d'),$entry,'GJ');
-			//Auto SJ
-			echo "success";
 		}else{
 			echo $stat;
 		}
@@ -2334,9 +2875,13 @@ switch($_REQUEST['execute']){
 	echo '</table>';
 	break;
 	case"custtransdetails":
+		$txtsearch="";
+		if($_REQUEST['txtsearch']){
+			$txtsearch="and a.receipt in (select refid from tbl_sales_invoice_items where item_spec like '%{$_REQUEST['txtsearch']}%' or barcode like '%{$_REQUEST['txtsearch']}%')";
+		}
 		$sql = "select a.*,b.date_delivered from tbl_customers_trans a
 		left join tbl_customers_trans_delivery b on a.receipt=b.receipt and a.cust_id=b.cust_id 
-		where a.cust_id='{$_REQUEST['acctid']}' order by a.date desc";
+		where a.cust_id='{$_REQUEST['acctid']}' $txtsearch order by a.date desc";
 		//$sql = "select * from tbl_customers_trans where cust_id='{$_REQUEST['acctid']}' order by date desc";
 		$qry = mysql_query($sql);
 		//echo '<table style="float:right;">';
@@ -2344,7 +2889,11 @@ switch($_REQUEST['execute']){
 		//echo '<td><input value="Print" onclick="window.print();" style="width:100px;" type="button"></input></td>';
 		//echo '</tr>';
 		//echo '</table>';
-		
+		echo "<fieldset>
+		<div style='float:left;margin-right:10px;'>Search:</div>
+		<input type='text' name='txtsearch' id='txtsearch' style='width:300px;float:left;'/>
+		<input type='button' value='Execute' style='width:150px;height:25px;float:right;' onclick='refreshTrans()'/>
+		</fieldset>";
 		echo '<table class="tbl" cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;">';
 		echo '<tr>
 				<th>ReceiptDate</th>
@@ -2359,8 +2908,16 @@ switch($_REQUEST['execute']){
 				<th>Menu</th>':'').'
 			</tr>';
 		while($row=mysql_fetch_assoc($qry)){
+			$items = $db->resultArray("*","tbl_sales_invoice_items","where refid='{$row['receipt']}'");
+			$items_="<table style='width:100%;'><tr><td colspan='5'>".($row['transtype']=='Payment'?"OR# ".$row['receipt']:"")." {$row['details']}</td></td>";
+			foreach($items as $k=>$v){
+				$items_.="<tr><td>&nbsp;&nbsp;{$v['barcode']}</td><td>{$v['item_spec']}</td><td>{$v['qty']}</td><td>".number_format($v['unitprice']-($v['unitprice']/9.333333),2)."</td><td>".number_format($v['unitprice'],2)."</td><td style='text-align:right;'>".number_format($v['amount'],2)."</td></tr>";
+			}
+			$items_.="</table>";
+			$amt_display = number_format($row['amount'],2);
 			if($row['transtype']=='Payment' or $row['transtype']=='Credit Memo'){
 				$color = 'style="color:red;"';
+				$amt_display = "(".number_format($row['amount'],2).")";
 			}else if($row['date_delivered']=='' and $row['transtype']!="Adjustment"){
 				$color = 'style="color:green;"';
 			}else{
@@ -2371,8 +2928,8 @@ switch($_REQUEST['execute']){
 			//$statementbtn = '<img src="./images/print.png" style="width:20px;height:20px;float:left;" onclick="viewReport(\'./reports/soa.php?refid='.$row['receipt'].'\')"/>';
 			echo '<tr>
 					<td '.$color.'>'.($row['date']=="0000-00-00 00:00:00"?"":date('Y-m-d',strtotime($row['date']))).'</td>
-					<td '.$color.'>'.$row['details'].'</td>
-					<td '.$color.' align="right">'.number_format($row['amount'],2).'</td>
+					<td '.$color.'>'.$items_.'</td>
+					<td '.$color.' align="right">'.$amt_display.'</td>
 					<td>'.$row['date_delivered'].'</td>'.($_SESSION['settings']['system_name']=='Rber System'?
 					'<td>'.($row['paid_date']=='0000-00-00'?'':$row['paid_date']).'</td>
 					<td>'.$row['paid_details'].'</td>
@@ -2384,6 +2941,10 @@ switch($_REQUEST['execute']){
 		echo '</table>';
 		?>
 		<script>
+			function refreshTrans(){
+				var txtsearch=$("#txtsearch").val();
+				clickDialog('dialogbox2',1000,500,'custtransdetails&acctid=<?=$_REQUEST['acctid']?>&txtsearch='+txtsearch,'Customer Transaction Details');
+			}
 			function setPaid(refid){
 				clickDialog('dialogbox3',400,300,'setPaid&refid='+refid,'Payment Details');
 			}
@@ -3522,8 +4083,14 @@ switch($_REQUEST['execute']){
 		}
 	break;
 	case 'process_barcode':
+		$free=false;
+		if(strpos($_REQUEST['barcode'],"|")){
+			$free=true;
+			$bcode = explode("|",$_REQUEST['barcode']);
+		}
+		
 		$session_type=$_REQUEST['sessiontype']; //new added modification sept 14, 2014
-		$barcode = $_REQUEST['barcode'];
+		$barcode = $free?$bcode[0]:$_REQUEST['barcode'];
 		$prod_info = $db->getWHERE("sku_id,price,unit,divmul,cost","tbl_barcodes","where barcode='".$barcode."'");
 		$invbal = $db->invBal($prod_info['sku_id'],date('Y-m-d'));
 		if($prod_info){
@@ -3560,16 +4127,16 @@ switch($_REQUEST['execute']){
 				
 			}
 			$prod_name = $db->getWHERE("*","tbl_product_name","where sku_id='".$prod_info['sku_id']."'");
-			if($_REQUEST['type']=="uom"){
+			if($_REQUEST['type']=="uom" or $free==true){
 				$qty =1;
 			}else{
 				$qty = isset($_SESSION[$session_type][$barcode])?$_SESSION[$session_type][$barcode]['qty']+1:1;
 			}
 			$total = ($qty * $prod_info['price']);
 			$_SESSION['count']+=1;
-			$_SESSION[$session_type][$barcode]=array(
+			$_SESSION[$session_type][$free?$bcode[0]."|FREE":$barcode]=array(
 				"count"=>$_SESSION['count'],
-				"bcode"=>$barcode,
+				"bcode"=>$free?$bcode[0]."|FREE":$barcode,
 				"prod_name"=>$prod_name['product_name'],
 				"subjnametype"=>($prod_name['subject_name']?$prod_name['subject_name']."|".$prod_name['subjtype']:''),
 				"qty"=>$qty,
@@ -3628,7 +4195,7 @@ switch($_REQUEST['execute']){
 			//$db->updatePrice($barcode,$price);
 		}else{
 			$_SESSION[$session_type][$barcode]['cost'] = $price;
-			//$db->updateCost($barcode,$price);
+			$db->updateCost($barcode,$price);
 		}
 		echo "success";
 	break;
@@ -3809,9 +4376,128 @@ switch($_REQUEST['execute']){
 		}
 		echo "success";
 	break;
+	case'lotexpdateSave':
+		$sql="insert into tbl_product_lotexp (id,skuid,refid,qty_in,lotno,expdate) values ";
+		$flag=false;
+		//print_r($_REQUEST['rec']);exit;
+		foreach($_REQUEST['rec'] as $key => $val){
+			if($flag)$sql.=",";
+			$sql.="('".$val['idnum']."','{$_REQUEST['skuid']}','{$_REQUEST['refid']}','{$val['qty_in']}','{$val['lotno']}','{$val['expdate']}')";
+			$flag=true;
+		}
+		$sql .=" on duplicate key update qty_in=values(qty_in),lotno=values(lotno),expdate=values(expdate)";
+		$qry =mysql_query($sql);
+		if(!$qry){
+			echo mysql_error();
+		}else{
+			echo "success";
+		}
+	break;
+	case'lotexpdateAdd':
+		$sql ="select * from tbl_product_lotexp where skuid='{$_REQUEST['skuid']}' and refid='{$_REQUEST['refid']}' order by expdate asc";
+		$qry = mysql_query($sql);
+		?>
+		<form name="lotexp" id="lotexp">
+			<table id="lottbl" class="tbl" cellspacing="0" cellpadding="0" width="100%" >
+				<thead>
+					<tr>
+						<td><input type="button" value="+" onclick="addEntry()" style="height:30px;width:30px;"/></td>
+						<td>Lot #</td>
+						<td>Exp Date</td>
+						<td>QTY In</td>
+					</tr>
+				</thead>
+				<tbody>
+			<? $count=1;
+			while($row=mysql_fetch_assoc($qry)){	?>
+					
+					<tr>
+						<td>
+							<input type="radio"/>
+							<input type="hidden" name="rec[<?=$count?>][idnum]" value="<?=$row['id']?>"/>
+						</td>
+						<td><input type="text" name="rec[<?=$count?>][lotno]" value="<?=$row['lotno']?>" style="width:100%;"/></td>
+						<td><input type="text" class="xdatelot" name="rec[<?=$count?>][expdate]" value="<?=$row['expdate']!="0000-00-00"?$row['expdate']:""?>" style="width:100%;"/></td>
+						<td><input type="text" name="rec[<?=$count?>][qty_in]" value="<?=$row['qty_in']?>" style="width:100%;"/></td>
+					</tr>
+			<? $count++;} ?>
+				</tbody>
+			</table>
+			<input type="button" value="Save" onclick="saveLotTbl()" />
+		</form>
+		<script>
+			$(document).ready(function() {
+				$('.xdatelot').datepicker({
+					inline: true,
+					dateFormat:"yy-mm-dd"
+				});
+				$("#lottbl").bind('keydown',function(e){
+					var chCode = e.keyCode==0 ? e.charCode : e.keyCode;
+					if(chCode==46){ //pressing delete button
+						$('input[type="checkbox"]:checked').closest("tr").remove();
+					}
+				});
+			});
+			
+			function addEntry(){
+				var num =$("#lottbl tbody tr").length;
+				var txt = '<tr>\
+						<td><input type="radio"/></td>\
+						<td><input type="text" name="rec['+num+'][lotno]" value="" style="width:100%;"/></td>\
+						<td><input type="text" name="rec['+num+'][expdate]" value="" style="width:100%;"/></td>\
+						<td><input type="text" name="rec['+num+'][qty_in]" value="" style="width:100%;"/></td>\
+					</tr>';
+				$("#lottbl tbody").prepend(txt);
+			}
+			function saveLotTbl(){
+				var formvalue = serializing('#lotexp');
+				var skuid = $("#mytbl tr.selected").find("td:eq(7)").html();
+				var refid = $("#refid").val();
+				if(refid!=''&&skuid!=''){
+					$.ajax({
+						url: './content/pos_ajax.php?execute=lotexpdateSave&skuid='+skuid+'&refid='+refid,
+						type:"POST",
+						data:formvalue,
+						success:function(data){
+							if(data=="success"){
+								window.location=document.URL;
+							}else{
+								alert(data);
+							}
+						}
+					});
+				}else{
+					alert("Pls save first before inputing Lot # & Exp Date...");
+				}
+			}
+		</script>
+		<?
+	break;
+	case'lotexpdate':
+		$sql ="select * from tbl_product_lotexp where skuid='{$_REQUEST['skuid']}' order by expdate asc";
+		$qry = mysql_query($sql);
+		?>
+		<table class="tbl" id="tbllotexp" cellspacing="0" cellpadding="0" width="100%" >
+			<tr>
+				<td></td>
+				<td>Ref Code</td>
+				<td>Lot #</td>
+				<td>Exp Date</td>
+			</tr>
+		<? while($row=mysql_fetch_assoc($qry)){	?>
+				<tr>
+					<td><input type="radio"/></td>
+					<td><a href="javascript:itemSelected('<?php echo $row['skuid'] ?>','');" class="activation"><?php echo $row['skuid'] ?></a></td>
+					<td><?=$row['lotno']?></td>
+					<td><?=$row['expdate']!="0000-00-00"?$row['expdate']:""?></td>
+				</tr>
+		<? } ?>
+		</table>
+		<?
+	break;
 	case'prodlist':
 		?>
-		<div id="tbl_content" name="tbl_content" style="overflow:auto;height:80%;font-size:15px;">
+		<div id="tbl_content" name="tbl_content" style="overflow:auto;height:75%;font-size:15px;">
 			<table class="tbl" id="tbl" cellspacing="0" cellpadding="0" width="100%" >
 				<tr>
 					<th style="border:none;">Barcodes</th>
@@ -3831,6 +4517,8 @@ switch($_REQUEST['execute']){
 		<input id="bt3" class="buthov" type="button" value="Add NewProd" onclick="prodAdd();" style="float:left;height:40px;width:150px;"/>
 		<input id="bt5" class="buthov" type="button" value="Refresh Inv" onclick="SendInvToAdmin();" style="float:left;height:40px;width:150px;"/>
 		<input id="bt4" class="buthov" type="button" value="Update Items" onclick="updateItems();" style="float:left;height:40px;width:150px;"/>
+		<input id="bt7" class="buthov" type="button" value="Free" onclick="freeprod();" style="float:right;height:40px;width:150px;"/>
+		<input id="bt6" class="buthov" type="button" value="Lot#/Exp Date" onclick="lotexpdate();" style="float:right;height:40px;width:150px;"/>
 		<!--fieldset style="width:250px;float:right;">
 			<div style="float:left;margin-right:5px;"><input type="radio" value="False" name="status_hidden" checked /> Not-Hidden </div>
 			<div style="float:left;"><input type="radio" value="" name="status_hidden"/> All </div>
@@ -3853,11 +4541,26 @@ switch($_REQUEST['execute']){
 					alert("Be specific when searching...");
 				}
 			}
+			function freeprod(){
+				var skuid = $("#tbl tr.selected").find("td:eq(1)").html()+"|FREE";
+				var id='';
+				if(stat){
+					setValue(skuid,id);
+					$('#prodlist').dialog('close');
+					stat=false;
+				}
+			}
+			function lotexpdate(){
+				var skuid = $("#tbl tr.selected").find("td:eq(1)").html();
+				clickDialog("dialogbox2",400,300,"lotexpdate&skuid="+skuid,"Lot # & Exp Date");
+				jQuery.tableNavigation();
+			}
 			
 		</script>
 		<?
 	break;
-	case"prodlist_item":
+	case"prodlist_item--":
+		$db->openDb("main");
 		if($_REQUEST['page']=="stockin"||$_REQUEST['page']=="po"||$_REQUEST['page']=="prod_maintenance"){
 			$bal = "";
 		}else{
@@ -3870,7 +4573,7 @@ switch($_REQUEST['execute']){
 			$prodsearch = "prod.product_name like '%".$_REQUEST['search_prodname']."%' or prod.brand like '%".$_REQUEST['search_prodname']."%' or prod.inventory_code like '%".$_REQUEST['search_prodname']."%' 
 				or prod.location like '%".$_REQUEST['search_prodname']."%' or prod.class like '%".$_REQUEST['search_prodname']."%' or prod.parts_number like '%".$_REQUEST['search_prodname']."%'";
 		}else{
-			$prodsearch = "prod.product_name like '%".$_REQUEST['search_prodname']."%'";
+			$prodsearch = "prod.product_name like '%".$_REQUEST['search_prodname']."%' or prod.sku_id like '%".$_REQUEST['search_prodname']."%'";
 		}
 		// $sql="select prod.*,bcode.barcode,bcode.price,bcode.cost,bcode.unit,cat.category_name,tbl_2.* from 
 			// tbl_product_name prod 
@@ -3941,7 +4644,7 @@ switch($_REQUEST['execute']){
 				?>
 					<tr style="color:<?=($row['bal_total']>0?"blue;":"black;")?>">
 						<td><a href="javascript:itemSelected('<?php echo $row['barcode'] ?>','<?=$_REQUEST['bcodeid']?>');" class="activation"><?php echo $row['barcode'] ?></a></td>
-						<td style="display:none;"><?= $row['skuid']?></td>
+						<td style="display:none;"><?= $row['sku_id']?></td>
 						<td><?= $row['product_name']?></td>
 						<?php if($_SESSION['settings']['system_name']=="TKC"){ ?>
 						<td><?= $row['brand']?></td>
@@ -3954,6 +4657,111 @@ switch($_REQUEST['execute']){
 						<td style="display:none;"><?= number_format($row['cost'],2) ?></td>
 						<td><?= $row['unit'] ?></td>
 						<td style="text-align:center;"><?= $row['bal_total'] ?></td>
+						<td><?= $row['category_name'] ?></td>
+					</tr>
+				<? $count++;}
+				}?>
+			</tbody>
+		</table>
+		<script>
+			function itemSelected(barcode,id){
+				if(stat){
+					setValue(barcode,id);
+					$('#prodlist').dialog('close');
+					stat=false;
+				}
+				//barcode_area(barcode,id); //process barcodes
+			}
+		</script>
+		<?
+	break;
+	case"prodlist_item":
+		$db->openDb("main");
+		if($_REQUEST['page']=="stockin"||$_REQUEST['page']=="po"||$_REQUEST['page']=="prod_maintenance"){
+			$bal = "";
+		}else{
+			$bal = " and bal_total>0";
+		}
+		if($_SESSION['settings']['allow_negative_inv']==true){
+			$bal = "";
+		}
+		if($_SESSION['settings']['system_name']=="TKC"){
+			$prodsearch = "prod.product_name like '%".$_REQUEST['search_prodname']."%' or prod.brand like '%".$_REQUEST['search_prodname']."%' or prod.inventory_code like '%".$_REQUEST['search_prodname']."%' 
+				or prod.location like '%".$_REQUEST['search_prodname']."%' or prod.class like '%".$_REQUEST['search_prodname']."%' or prod.parts_number like '%".$_REQUEST['search_prodname']."%'";
+		}else{
+			$prodsearch = "prod.product_name like '%".$_REQUEST['search_prodname']."%' or prod.sku_id like '%".$_REQUEST['search_prodname']."%'";
+			$prodsearch2 = "where skuid in (select sku_id from tbl_product_name prod where product_name like '%".$_REQUEST['search_prodname']."%' or prod.sku_id like '%".$_REQUEST['search_prodname']."%')";
+		}
+		$sql="select prod.*,bcode.barcode,bcode.price,bcode.cost,bcode.unit,cat.category_name from 
+			tbl_product_name prod 
+			left join tbl_barcodes bcode on prod.sku_id=bcode.sku_id 
+			left join tbl_category cat on prod.category_id=cat.category_id 
+			where $prodsearch order by prod.product_name asc";
+		$res = $con->resultArray($con->Nection()->query($sql));
+		
+		$onhand_sql = "select skuid,sum(in_total) in_total,sum(out_total) out_total,sum(in_total-out_total) bal_total from 
+				(select skuid,coalesce(sum(qty*coalesce(divmul,1)),0) in_total,0 out_total from tbl_stockin_items $prodsearch2 group by skuid
+					union
+				select skuid,0 in_total,coalesce(sum(qty*coalesce(divmul,1)),0) out_total from tbl_sales_items $prodsearch2 group by skuid
+					union
+				select skuid,0 in_total,coalesce(sum(qty*coalesce(divmul,1)),0) out_total from tbl_sales_invoice_items $prodsearch2 group by skuid
+						union
+				select skuid,0 in_total,coalesce(sum(qty*coalesce(divmul,1)),0) out_total from tbl_stockout_items $prodsearch2 group by skuid
+					) tbl_1 group by skuid";
+		if(isset($_SESSION['connect'])){
+			$onhand = $con->pdoStyle($_SESSION['conlist'][$_SESSION['connect']]['ipaddress'],$_SESSION['conlist'][$_SESSION['connect']]['db_name'],$onhand_sql);
+		}else{
+			$onhand = $con->pdoStyle($_SESSION['conlist']['main']['ipaddress'],$_SESSION['conlist']['main']['db_name'],$onhand_sql);
+		}
+		
+		foreach($onhand as $k => $val){
+			$bal_total[$val['skuid']]=$val['bal_total'];
+		}
+		?>
+		<table class="navigateable tbl" id="tbl" cellspacing="0" cellpadding="0" width="100%">
+			<thead>
+				<tr>
+					<th>Barcodes</th>
+					<th style="display:none;">SKU</th>
+					<th>Desc</th>
+					<?php if($_SESSION['settings']['system_name']=="TKC"){ ?>
+					<th>Brand</th>
+					<th>Inventory Code</th>
+					<th>Location</th>
+					<th>Class</th>
+					<th>Parts Number</th>
+					<?php } ?>
+					<th>Price</th>
+					<th style="display:none;">Cost</th>
+					<th>Unit</th>
+					<th>Stock OnHand</th>
+					<th>Category</th>
+				</tr>
+			</thead>
+			<tbody>
+				<? 	
+				if(!$res){
+					echo "<tr>
+							<td colspan='7' align='center'>No Records Found...</td>
+						</tr>";
+				}else{
+				foreach($res as $key => $row){ 
+				?>
+					<tr style="color:<?=($row['bal_total']>0?"blue;":"black;")?>">
+						<td><a href="javascript:itemSelected('<?php echo $row['barcode'] ?>','<?=$_REQUEST['bcodeid']?>');" class="activation"><?php echo $row['barcode'] ?></a></td>
+						<td style="display:none;"><?= $row['sku_id']?></td>
+						<td><?= $row['product_name']?></td>
+						<?php if($_SESSION['settings']['system_name']=="TKC"){ ?>
+						<td><?= $row['brand']?></td>
+						<td><?= $row['inventory_code']?></td>
+						<td><?= $row['location']?></td>
+						<td><?= $row['class']?></td>
+						<td><?= $row['parts_number']?></td>
+						<?php } ?>
+						<td><?= number_format($row['price'],2) ?></td>
+						<td style="display:none;"><?= number_format($row['cost'],2) ?></td>
+						<td><?= $row['unit'] ?></td>
+						<td style="text-align:center;"><?= $bal_total[$row['sku_id']] ?></td>
 						<td><?= $row['category_name'] ?></td>
 					</tr>
 				<? $count++;}

@@ -175,7 +175,7 @@ input, select {
 									<input <?=in_array("Peptic Ulcer",$rec['family_history'])?"checked":""?> type="checkbox" name="data[family_history][]" value="Peptic Ulcer"/> Peptic Ulcer
 									<input <?=in_array("Tuberculosis",$rec['family_history'])?"checked":""?> type="checkbox" name="data[family_history][]" value="Tuberculosis"/> Tuberculosis
 									<input <?=in_array("Others",$rec['family_history'])?"checked":""?>  type="checkbox" name="data[family_history][]" value="Others"/> Others
-									<input value="<?=$rec['family_history']['others']?>" type="text" name="data[family_history][others]" style="width:80px;"/>
+									<span style="font-size:15px;"><?=$rec['family_history']['others']?></span>
 								</td>
 							</tr>
 							<tr>

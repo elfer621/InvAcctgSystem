@@ -1006,3 +1006,21 @@ ALTER TABLE `tbl_customers_trans`
 	
 ALTER TABLE `tbl_customers_trans`
 	ADD COLUMN `or_ref` VARCHAR(50) NOT NULL AFTER `reading`;
+	
+ALTER TABLE `tbl_customers`
+	ADD COLUMN `agent_id` VARCHAR(50) NOT NULL AFTER `fax`;
+	
+	
+ALTER TABLE `tbl_customers_trans`
+	ADD COLUMN `more_details` TEXT NOT NULL AFTER `details`;
+	
+ALTER TABLE `tbl_journal_entry`
+	ADD COLUMN `ar_nontrade_refid` INT(11) NULL DEFAULT NULL AFTER `ap_refid`;
+	
+ALTER TABLE `tbl_sales_invoice_header`
+	ADD COLUMN `cust_address` VARCHAR(100) NOT NULL AFTER `preparedby`,
+	ADD COLUMN `cust_telnum` VARCHAR(100) NOT NULL AFTER `cust_address`,
+	ADD COLUMN `cust_faxnum` VARCHAR(100) NOT NULL AFTER `cust_telnum`,
+	ADD COLUMN `cust_contactperson` VARCHAR(100) NOT NULL AFTER `cust_faxnum`,
+	ADD COLUMN `cust_tin` VARCHAR(100) NOT NULL AFTER `cust_contactperson`;
+

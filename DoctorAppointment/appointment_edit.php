@@ -42,7 +42,7 @@
                 <div>
                     <select id="resource" name="resource" disabled ng-model="appointment.doctor">
                     <?php
-                        foreach($db->query('SELECT * FROM [doctor] ORDER BY [doctor_name]') as $item) {
+                        foreach($db->query('SELECT * FROM doctor ORDER BY doctor_name') as $item) {
                             $selected = "";
                             if ($event["doctor_id"] == $item["doctor_id"]) {
                                 $selected = " selected";

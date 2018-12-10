@@ -52,6 +52,7 @@
 	
 	<script src="./js/tinymce/js/tinymce/tinymce.min.js"></script>
 	<script src="./js/maskedinput.js"></script>
+	
 </head>
 <body>
 <div style="z-index:1002"><?//=$_SESSION['error']?></div>
@@ -80,9 +81,21 @@ switch($_SESSION['settings']['system_name']){
 		<div style="font-size:20px;color:<?=$fontcolor?$fontcolor:"#000"?>;margin-top:5px;float:left;"><?=$db->stockin_header."</br><span style='font-size:12px;'>".($_SESSION['connect']?strtoupper($_SESSION['connect']):"Main Branch")."</span>";?></div>
 	</div>
 	<div class="icon-container" onclick="myFunction(this)">
-	  <div class="bar1" style="background-color:<?=$fontcolor?$fontcolor:"#fff"?>"></div>
-	  <div class="bar2" style="background-color:<?=$fontcolor?$fontcolor:"#fff"?>"></div>
-	  <div class="bar3" style="background-color:<?=$fontcolor?$fontcolor:"#fff"?>"></div>
+	  <div class="bar1" style="background-color:<?=$fontcolor?$fontcolor:"#000"?>"></div>
+	  <div class="bar2" style="background-color:<?=$fontcolor?$fontcolor:"#000"?>"></div>
+	  <div class="bar3" style="background-color:<?=$fontcolor?$fontcolor:"#000"?>"></div>
+	</div>
+	<div style="float:left;">
+		<div style="width:150px;float:left;">Branch</div>
+		<select id="branchname" style="width:100%;">
+			<option value="main">Cebu</option>
+			<?php
+			$branch = $db->resultArray("*","settings_connections","where con_name !='main'");
+			foreach($branch as $key => $val){
+				echo "<option ".($_SESSION['connect']==$val['con_name']?"selected":"")." value='{$val['con_name']}'>".ucfirst($val['con_name'])."</option>";
+			}
+			?>
+		</select>
 	</div>
 	<div class="main-header-right">
 		<div style="font-size:12px;text-align:center;color:<?=$fontcolor?$fontcolor:"#000"?>;"><?="Connected:".$db->constatus;?></div>
@@ -93,7 +106,7 @@ switch($_SESSION['settings']['system_name']){
 <?php } ?>
 
 <div class="main-out" style="margin:0px 0 10px 0;">
-	<div class="main <?=$_REQUEST['page']=="sales"||$_REQUEST['page']=="order"?"":"full"?>">
+	<div class="main <?=$_REQUEST['page']=="sales"||$_REQUEST['page']=="order"||$_REQUEST['page']=="estore"?"":"full"?>">
 		<div class="page <?=$_REQUEST['page']!="sales"?"full":""?>">
 			<?php
 				require_once "$content";
@@ -111,5 +124,18 @@ switch($_SESSION['settings']['system_name']){
 	<div id="msg"></div>
 	<div style="clear:both;"></div>
 </div>
+<script>
+$("#branchname").change(function(){
+	$.ajax({
+		url: './content/pos_ajax.php?execute=changebranch&branchname='+$(this).val(),
+		type:"POST",
+		success:function(data){
+			if(data=="success"){
+				window.location=document.URL;
+			}
+		}
+	});
+});
+</script>
 </body>
 </html>

@@ -119,7 +119,7 @@ $items = $db->resultArray("*","tbl_{$_REQUEST['tbltype']}_items","where refid='"
 					<td style="text-align:right;width:150px;">'.number_format($val['amount'],2).'</td>
 				</tr>';
 			$count++;$total+=$val['amount'];
-			}  
+			}
 			if($header['agreement']&&$_REQUEST['tbltype']=="billing_statement"){
 				echo "<tr>
 				<td style='vertical-align: top;' rowspan='".($num-$count)."' colspan='6'>".$header['agreement']."</td>
@@ -130,9 +130,16 @@ $items = $db->resultArray("*","tbl_{$_REQUEST['tbltype']}_items","where refid='"
 				}
 			}else{
 				echo $tbl;
+				
 				for($x=1;$x<=($num-$count);$x++){
 					echo "<tr><td colspan='5'>&nbsp;</td></tr>";
+				
+					if($x==4){
+						echo $header['agreement']?"<tr><td colspan='5'>{$header['agreement']}</td></tr>":"";
+					}
 				}
+
+				
 			}
 			?>
 		</table>

@@ -20,7 +20,7 @@ $events = array();
 foreach($result as $row) {
   $e = new Event();
   $e->id = $row['appointment_id'];
-  $e->text = "";
+  $e->text = $row['appointment_patient_name'];
   $e->start = $row['appointment_start'];
   $e->end = $row['appointment_end'];
   $e->tags = new Tags();

@@ -123,6 +123,7 @@ if(!$qry){
 				) as y on x.cust_id=y.cust_id where x.cust_id='{$row['cust_id']}'
 				");
 			$info = mysql_fetch_assoc($qry_info);
+			$bal = $info['total_bal']-$info['total_undelivered'];
 		?>
 			<tr>
 				<td><?=$row['xdate']?></td>
@@ -130,7 +131,7 @@ if(!$qry){
 				<td><?=$row['customer_name']?></td>
 				<td><?=$row['details']?></td>
 				<td><?=number_format($row['amount'],2)?></td>
-				<td style="color:blue;"><?=number_format($info['total_bal']-$info['total_undelivered'],2)?></td>
+				<td style="color:blue;"><?=$bal>=0?number_format($bal,2):"(".number_format($bal * -1,2).")"?></td>
 				<?php if($_REQUEST['rep_type']=="undelivered_receipt"){ ?>
 				<td><?=$row['date_delivered']?></td>
 				<td><a href="javascript:updateDateDelivered(<?=$row['cust_id']?>,<?=$row['receipt']?>)">Update</a></td>

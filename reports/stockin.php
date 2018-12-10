@@ -47,21 +47,46 @@ session_start();
 require_once"../class/dbConnection.php";
 $db=new dbConnect();
 $db->openDb();
-$sql = "select a.*,b.supplier_name from tbl_{$_REQUEST['page']}_header as a left join tbl_supplier as b on a.supplier_id=b.id
+
+$sql = "select a.* from tbl_{$_REQUEST['page']}_header as a 
 	where a.id='".$_REQUEST['refid']."'";
 $qry = mysql_query($sql);
 $info = mysql_fetch_assoc($qry);
-$sql_item = mysql_query("select * from tbl_{$_REQUEST['page']}_items where stockin_refid='".$_REQUEST['refid']."' order by count desc");
+$sql_item = mysql_query("select * from tbl_{$_REQUEST['page']}_items where stockin_refid='".$_REQUEST['refid']."' order by count asc");
+if($info['status']=='Received from Branch'){
+	$supbranch = $db->getWHERE("*","tbl_branch","where id='{$info['supplier_id']}'");
+}else{
+	$supbranch = $db->getWHERE("*,supplier_name name","tbl_supplier","where id='{$info['supplier_id']}'");
+}
+
 ?>
 <body style="font-size:15px;">
 <div style="font-family:Arial, Verdana, Geneva, Helvetica, Sans-Serif;width:900px;">
-<h2><?= $db->stockin_header;?><br/><span style="font-size:17px;">Receiving Reports <?=($_SESSION['connect']?"(".strtoupper($_SESSION['connect']).")":"ACCOUNTING")?></span></h2>
-<?php echo "RR No.: ".$info['id'] ?><span style="float:right;"><?php echo $info['date'] ?></span><br/>
-<div class="lbl">Supplier Name:</div>
-<div style="float:left;"><?php echo $info['supplier_name'] ?></div>
+<h2><?= $db->stockin_header;?><br/><span style="font-size:17px;">Receiving Reports <?=($_SESSION['connect']?"(".strtoupper($_SESSION['connect']).")":"MAIN")?></span></h2>
+<div style="float:left;width:45%;">
+	<?php echo "RR No.: ".$info['id'] ?><br/>
+	<?php if($info['status']=='Received from Branch'){ ?>
+		<div class="lbl">From:</div>
+		<div style="float:left;"><?php echo ucfirst($supbranch['name']) ?></div>
+	<?php }else{ ?>
+		<div class="lbl">Supplier Name:</div>
+		<div style="float:left;"><?php echo ucfirst($supbranch['name']) ?></div>
+	<?php } ?>
+</div>
+<div style="float:right;width:45%">
+<div style="float:right;"><?php echo $info['date'] ?></div>
+<br/>
+<div style="float:right;">SI#:  <?php echo $info['sinum'] ?></div>
+</div>
 <div style="clear:both;height:5px;"></div>
+<?php if($info['status']=='Received from Branch'){ ?>
+	<div class="lbl">To:</div>
+	<div style="float:left;"><?php echo ucfirst($_SESSION['connect']) ?></div>
+	<div style="clear:both;height:5px;"></div>
+<?php } ?>
 <div class="lbl">Remarks:</div>
 <div style="float:left;"><?php echo $info['remarks'] ?></div>
+
 <div style="clear:both;height:5px;"></div>
 <div style="min-height:400px;">
 	<table class="tbl" cellspacing="0" cellpadding="0" width="100%">
@@ -94,6 +119,15 @@ $sql_item = mysql_query("select * from tbl_{$_REQUEST['page']}_items where stock
 				<td colspan='5' style="text-align:right;">Total Amount:</td>
 				<td style="text-align:right;"><?=number_format($info['total'],2)?></td>
 			</tr>
+			<tr>
+				<td colspan='5' style="text-align:right;">VAT:</td>
+				<td style="text-align:right;"><?=number_format($info['total']*.12,2)?></td>
+			</tr>
+			<tr>
+				<td colspan='5' style="text-align:right;">Grand Total:</td>
+				<td style="text-align:right;"><?=number_format($info['total']*1.12,2)?></td>
+			</tr>
+			
 			<?php /*
 			<tr>
 				<td colspan='5' style="text-align:right;">Less Volume Discount:</td>

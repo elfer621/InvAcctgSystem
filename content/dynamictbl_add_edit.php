@@ -1,4 +1,5 @@
 <?php 
+//$db->openDb("main");
 $colfields=[];
 $colfields_extra=[];
 $not = array("base_inv","base_unit","freight_handling","supplier_id","group_id","manufacturer_id","category_id","reorder_level","school_level",

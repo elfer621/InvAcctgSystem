@@ -74,8 +74,10 @@ $sql = "SELECT
 			sum(if(category_id = 1,qty*cost,0)) book_cost,
 			sum(if(category_id = 1,qty*vat,0)) book_vat,
 			sum(if(category_id = 2,qty*selling,0)) idsling_sales,
-			sum(if(category_id = 2,qty*cost,0)) idsling_cost,
-			sum(if(category_id = 2,qty*vat,0)) idsling_vat,
+			sum(if(category_id = 3,qty*selling,0)) CM_sales,
+			sum(if(category_id != 1,qty*selling,0)) vatable_sales,
+			sum(if(category_id != 1,qty*cost,0)) vatable_cost,
+			sum(if(category_id != 1,qty*vat,0)) vatable_vat,
 			sum(qty*selling) total_sales,
 			sum(qty*cost) total_cost,
 			sum(qty*vat) total_vat,
@@ -133,12 +135,13 @@ if($_SESSION['connect']){
 				<th rowspan="2">CAMPUS</th>
 				<th rowspan="2">COUNTER</th>
 				<th rowspan="2">RECEIPT NO</th>
-				<th colspan="3">VAT INCLUSIVE</th>
+				<th colspan="4">VAT INCLUSIVE</th>
 				<th colspan="1">VAT EXEMPT</th>
 				<th rowspan="2">TOTAL SALES</th>
 			</tr>
 			<tr>
 				<th>ID</th>
+				<th>CLOTHING MATERIAL</th>
 				<th>VATABLE</th>
 				<th>VAT</th>
 				
@@ -148,23 +151,32 @@ if($_SESSION['connect']){
 		</thead>
 		<tbody>
 			<?php 
-			$grand_bs=0;$grand_bc=0;$grand_bv=0;$grand_is=0;$grand_ic=0;$grand_iv=0;$grand_ts=0;$grand_tc=0;$grand_tv=0;
+			$grand_bs=0;$grand_bc=0;$grand_bv=0;$grand_is=0;$grand_ic=0;$grand_iv=0;$grand_ts=0;$grand_tc=0;$grand_tv=0;$grand_vs;
 			foreach($list as $key => $val){ ?>
 				<?php if($val['counter']==null){ ?>
 					<tr style="border:1px solid black;font-weight:bold;">
 						<td colspan="3" style="text-align:center;">Sub Total</td>
 						<td style="text-align:right;"><?=number_format($val['idsling_sales'],2)?></td>
-						<td style="text-align:right;"><?=number_format($val['idsling_sales']/1.12,2)?></td>
-						<td style="text-align:right;"><?=number_format($val['idsling_vat'],2)?></td>
+						<td style="text-align:right;"><?=number_format($val['cm_sales'],2)?></td>
+						<td style="text-align:right;"><?=number_format($val['vatable_sales']/1.12,2)?></td>
+						<td style="text-align:right;"><?=number_format($val['vatable_vat'],2)?></td>
 						
 						<td style="text-align:right;"><?=number_format($val['book_sales'],2)?></td>
 						
 						<td style="text-align:right;"><?=number_format(($val['idsling_sales']+$val['book_sales']),2)//."|".number_format($val['total_sales'],2)?></td>
 					</tr>
 				<?php 
-					$grand_bs+=$val['book_sales'];$grand_bc+=$val['book_cost'];$grand_bv+=$val['book_vat'];
-					$grand_is+=$val['idsling_sales'];$grand_ic+=$val['idsling_cost'];$grand_iv+=$val['idsling_vat'];
-					$grand_ts+=($val['idsling_sales']+$val['book_sales']);$grand_tc+=$val['total_cost'];$grand_tv+=$val['total_vat'];
+					$grand_bs+=$val['book_sales'];
+					$grand_bc+=$val['book_cost'];
+					$grand_bv+=$val['book_vat'];
+					$grand_is+=$val['idsling_sales'];
+					$grand_cm+=$val['cm_sales'];
+					$grand_ic+=$val['vatable_cost'];
+					$grand_iv+=$val['vatable_vat'];
+					$grand_ts+=($val['idsling_sales']+$val['book_sales']);
+					$grand_tc+=$val['total_cost'];
+					$grand_tv+=$val['total_vat'];
+					$grand_vs+=$val['vatable_sales'];
 				}else{ ?>
 					<tr>
 						<td style="text-align:center;"><?=strtoupper($val['campus'])?></td>
@@ -172,8 +184,9 @@ if($_SESSION['connect']){
 						<td style="text-align:center;"><?=$val['receipt_range']?></td>
 						
 						<td style="text-align:right;"><?=number_format($val['idsling_sales'],2)?></td>
-						<td style="text-align:right;"><?=number_format($val['idsling_sales']/1.12,2)?></td>
-						<td style="text-align:right;"><?=number_format($val['idsling_vat'],2)?></td>
+						<td style="text-align:right;"><?=number_format($val['cm_sales'],2)?></td>
+						<td style="text-align:right;"><?=number_format($val['vatable_sales']/1.12,2)?></td>
+						<td style="text-align:right;"><?=number_format($val['vatable_vat'],2)?></td>
 						
 						<td style="text-align:right;"><?=number_format($val['book_sales'],2)?></td>
 						
@@ -186,12 +199,13 @@ if($_SESSION['connect']){
 			<tr style="border:1px solid black;font-weight:bold;">
 				<td colspan="3" style="text-align:center;">Grand Total</td>
 				<td style="text-align:right;"><?=number_format($grand_is,2)?></td>
-						<td style="text-align:right;"><?=number_format($grand_is/1.12,2)?></td>
-						<td style="text-align:right;"><?=number_format($grand_iv,2)?></td>
-						
-						<td style="text-align:right;"><?=number_format($grand_bs,2)?></td>
-						
-						<td style="text-align:right;"><?=number_format($grand_ts,2)?></td>
+				<td style="text-align:right;"><?=number_format($grand_cm,2)?></td>
+				<td style="text-align:right;"><?=number_format($grand_vs/1.12,2)?></td>
+				<td style="text-align:right;"><?=number_format($grand_iv,2)?></td>
+				
+				<td style="text-align:right;"><?=number_format($grand_bs,2)?></td>
+				
+				<td style="text-align:right;"><?=number_format($grand_ts,2)?></td>
 			</tr>
 		</tfoot>
 	</table>

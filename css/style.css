@@ -3,7 +3,7 @@ body {
 	font-size: 12px;
 	color: #313030;
 	background-color: #027fcf;
-	background-image: url(../images/bg.jpg);
+	/*background-image: url(../images/bg.jpg);*/
 	background-repeat: repeat-x;
 	background-position: left top;
 	margin: 0px;
@@ -21,6 +21,7 @@ img, div, input {
 	background-position: center top;
 	width: 100%;
 	float: left;
+	background-color:#ececec;
 }
 .main {
 	width: 990px;
@@ -44,7 +45,7 @@ img, div, input {
 	background-position: center top;*/
 	/*background-color: #e5e8e7;*/
 	background-color:#FEA423;
-	height: 55px;
+	height: 65px;
 	width:100%;
 	margin-bottom:0;
 	color:#fff;
@@ -52,6 +53,7 @@ img, div, input {
 .full{
 	min-height: 900px;
 	width:100% !important;
+	background-color:#fff;
 }
 .main-header-left{
 	float:left;
@@ -612,3 +614,10 @@ and (max-width : 1100px) {
 .ui-dialog{
 	width:80% !important;
 }*/
+
+.scheduler_default_corner div:nth-of-type(2) {
+    display: none !important;
+}
+.scheduler_default_corner div:nth-of-type(4) {
+    display: none !important;
+}

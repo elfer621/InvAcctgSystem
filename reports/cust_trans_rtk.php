@@ -35,6 +35,7 @@
 			background-color: white;
 			height:20px;
 			text-align:center;
+			padding:3px;
 		}
 		.lbl{
 			float:left;margin-right:10px;width:120px;
@@ -70,9 +71,10 @@ switch($_REQUEST['rep_type']){
 	break;
 	default:
 	$xdate = $_REQUEST['my_date']?"'".$_REQUEST['my_date']."'":'current_date()';
+	$enddate = $_REQUEST['end_date']?"'".$_REQUEST['end_date']."'":'current_date()';
 	$sql = "select *,date_format(a.date,'%Y-%m-%d') as xdate from tbl_customers_trans a
 		left join tbl_customers b on a.cust_id=b.cust_id
-		where date_format(a.date,'%Y-%m-%d')=$xdate and (a.transtype='Payment' or a.transtype='Credit Memo')";
+		where (date_format(a.date,'%Y-%m-%d') between $xdate and $enddate) and (a.transtype='Payment' or a.transtype='Credit Memo')";
 	$title="Payment/Credit Memo";
 	break;
 }
@@ -84,8 +86,11 @@ if(!$qry){
 <body style="margin:0 auto 0;width:1200px;font-size:11px;">
 	<h2>Customer <?=$title?> Report</h2>
 	<form name="frm_cust" method="post">
-		<div style="float:left;margin-right:30px;">Date</div>
+		<div style="float:left;margin-right:30px;">Beg Date</div>
 		<input style="float:left;" type="text" id="my_date" name="my_date" value="<?=$_REQUEST['my_date']?$_REQUEST['my_date']:date('Y-m-d')?>"/>
+		
+		<div style="float:left;margin-right:30px;">End Date</div>
+		<input style="float:left;" type="text" id="end_date" name="end_date" value="<?=$_REQUEST['end_date']?$_REQUEST['end_date']:date('Y-m-d')?>"/>
 		<input type="submit" value="Search" name="search_date"/>
 	</form>
 	<div style="clear:both;height:20px;"></div>
@@ -126,21 +131,27 @@ if(!$qry){
 			<tr>
 				<td><?=$row['xdate']?></td>
 				<td><?=$row['transtype']?></td>
-				<td><?=$row['customer_name']?></td>
-				<td><?=$row['details']?></td>
-				<td><?=number_format($row['amount'],2)?></td>
+				<td style="text-align:left;"><?=$row['customer_name']?></td>
+				<td style="text-align:left;"><?="OR# ".$row['receipt']." ".$row['details']?></td>
+				<td style="text-align:right;"><?=number_format($row['amount'],2)?></td>
 				<?php if($_REQUEST['rep_type']=="undelivered_receipt"){ ?>
 				<td><?=$row['date_delivered']?></td>
 				<td><a href="javascript:updateDateDelivered(<?=$row['cust_id']?>,<?=$row['receipt']?>)">Update</a></td>
 				<?php } ?>
 			</tr>
-		<?php } ?>
+		<?php 
+		$total+=$row['amount'];
+		} ?>
+		<tr>
+			<td colspan="4" style="text-align:center;"><strong>Total</strong></td>
+			<td colspan="3" style="text-align:right;"><strong><?=number_format($total,2)?></strong></td>
+		</tr>
 	</table>
 	<div id="dialog"></div>
 </body>
 <script>
 $(document).ready(function() {
-	$('#my_date').datepicker({
+	$('#my_date,#end_date').datepicker({
 		inline: true,
 		dateFormat:"yy-mm-dd"
 	});

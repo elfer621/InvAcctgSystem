@@ -67,6 +67,8 @@
 		</div>
 	</div>
 	<br/>
+	<input id="bt7" class="buthov" type="button" onclick="window.location='?page=doctorappointment&iframe=true';" value="Doctor Appointment" style="height:40px;width:100%;float:left;"/>
+	<br/>
 <? }elseif($_SESSION['restrictionid']==9){ //Laboratory ?>
 	<input id="bt9" class="buthov" type="button" value="Queue (Procedure)" onclick="window.location='?page=queue';" style="height:40px;width:100%;float:left;"/>
 	<br/>
@@ -95,7 +97,7 @@
 	<br/>
 	<input id="bt4" class="buthov" type="button" onclick="window.location='?page=import_files';" value="Import Data" style="height:40px;width:100%;float:left;"/>
 	<br/>
-	<input id="bt7" class="buthov" type="button" onclick="window.location='?page=doctorappointment&iframe=true';" value="Room Reservation" style="height:40px;width:100%;float:left;"/>
+	<input id="bt7" class="buthov" type="button" onclick="window.location='?page=doctorappointment&iframe=true';" value="Doctor Appointment" style="height:40px;width:100%;float:left;"/>
 	<br/>
 <? }else{ ?>
 	<button id="bt13" class="buthov" type="button" onclick="show_patientinfo();"  style="float:right;height:30px;width:100%;float:left;font-size:11px;"><span style="font-weight:bold;text-decoration:underline;">P</span>atient</button>
@@ -103,6 +105,8 @@
 	<input id="bt2" class="buthov" type="button" value="POS Sales" onclick="window.location='?page=order';" style="height:40px;width:100%;float:left;"/>
 	<br/>
 	<input id="bt1" class="buthov" type="button" value="Product Maintenance" onclick="window.location='?page=prod_maintenance';" style="height:40px;width:100%;float:left;"/>
+	<br/>
+	<input id="bt7" class="buthov" type="button" onclick="window.location='?page=doctorappointment&iframe=true';" value="Doctor Appointment" style="height:40px;width:100%;float:left;"/>
 	<br/>
 <? } ?>
 <?php if($_SESSION['settings']['connection_type']=="multiple"){ ?>

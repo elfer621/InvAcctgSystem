@@ -48,13 +48,19 @@
             nav.showMonths = 3;
             nav.skipMonths = 3;
             nav.onTimeRangeSelected = function(args) {
-                 loadEvents(args.start.firstDayOfWeek(), args.start.addDays(7));
+                 //loadEvents(args.start.firstDayOfWeek(), args.start.addDays(7));
+				 if (calendar.visibleStart().getDatePart() <= args.day && args.day < calendar.visibleEnd()) {
+                    calendar.scrollTo(args.day, "fast");  // just scroll
+                }
+                else {
+                    loadEvents(args.day);  // reload and scroll
+                }
             };
             nav.init();
 
             var calendar = new DayPilot.Calendar("calendar");
             calendar.viewType = "Week";
-            calendar.timeRangeSelectedHandling = "Disabled";
+            //calendar.timeRangeSelectedHandling = "Disabled";
 
             calendar.onEventMoved = function(args) {
                 $.post("backend_move.php", JSON.stringify(args), function(data) {
